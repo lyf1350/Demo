@@ -1,31 +1,57 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
+    <!-- <Sticky><Header/></Sticky> -->
+    <Header/>
+    <router-view/>
   </div>
 </template>
+<script>
+require("bootstrap");
+require("bootstrap/dist/css/bootstrap.css");
+
+require("@fortawesome/fontawesome-free");
+require("@fortawesome/fontawesome-free/css/all.css");
+require("animate.css");
+
+import Header from "@/components/Header.vue";
+import axios from "axios";
+export default {
+  components: {
+    Header
+  },
+  created() {
+    
+    // console.log("beforeCreated");
+    // var $this = this;
+    // axios.get("/api/user").then(function(response) {
+    //   if (response.data.success) {
+    //     let user = response.data.data;
+    //     if (user != null) {
+    //       console.log("set user");
+    //       $this.$store.commit("setUser", user);
+    //       service.createWebSocket();
+    //       service.init();
+    //     }
+    //   }
+    // });
+  }
+};
+</script>
 
 <style>
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-}
-#nav {
-  padding: 30px;
+  height: 100%;
 }
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+html,
+body {
+  height: 100%;
 }
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.my-box {
+  /* margin: 10px 0px 10px 10px; */
 }
 </style>
