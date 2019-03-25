@@ -86,6 +86,10 @@ export default new Router({
       path: "/template",
       component: () =>
         import("./views/template.vue")
+    }, {
+      path: "/workflow",
+      component: () =>
+        import("./views/workflow.vue")
     }
   ]
 });

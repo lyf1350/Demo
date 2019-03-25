@@ -5,324 +5,311 @@
     <button class="btn btn-primary" @click="type='createAction'">新建Action模版</button>
     <button class="btn btn-primary" @click="type='modifyAction'">修改Action模版</button>
     <div v-show="type=='createTemplate'">
+      <button class="btn btn-success" @click="createWorkflowTemplate">新建</button>
+      <button class="btn btn-success" data-toggle="modal" data-target="#modal">节点属性</button>
       <div id="myCreateDiv" style="flex-grow: 1; height: 750px; border: solid 1px black"></div>
     </div>
-
+    <div v-show="type=='modifyTemplate'">
+      流程模版<v-select :options="workflowOptions " v-model="workflowTemplate" id="workflowTemplate" placeholder="请选择" @change="initModifyTemplate"></v-select>
+      <button class="btn btn-success" @click="saveWorkflowTemplate">保存</button>
+      <button class="btn btn-success" data-toggle="modal" data-target="#modal">节点属性</button>
       <div id="myModifyDiv" style="flex-grow: 1; height: 750px; border: solid 1px black"></div>
-    <div v-if="type=='modifyTemplate'">22</div>
+    </div>
+    <div class="modal" id="modal">
+      <div class="modal-dialog">
+        <div class="modal-content" v-if="selectedNode">
+          <div class="modal-header">{{selectedNode?selectedNode.data.text:''}} 属性</div>
+          <div class="modal-content">
+            名称：
+            <input type="text" v-model="selectedNode.data.text">
+            位置：
+            <input type="text" v-model="selectedNode.data.loc">
+            审核人:{{selectedNode.data.prop.reviewers|reviewerFilter}}
+            <button
+              class="btn btn-primary"
+              data-toggle="modal"
+              data-target="#personModal"
+              @click="clear"
+            >编辑</button>
+
+            <div class="modal" id="personModal">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  用户:
+                  <v-select :options="userOptions " v-model="user" id="user" placeholder="请选择"></v-select>组:
+                  <v-select :options="groupOptions " v-model="group" id="group" placeholder="请选择"></v-select>角色:
+                  <v-select :options="roleOptions " v-model="role" id="role" placeholder="请选择"></v-select>
+                  <button class="btn btn-primary" @click="addReviewer">添加</button>
+                  <div
+                    v-for="(reviewer,index) in selectedNode.data.prop.reviewers"
+                    :key="'reviewer'+index"
+                  >
+                    <span v-if="reviewer.type=='user'">用户:{{reviewer.label}}</span>
+                    <span v-if="reviewer.type=='group'">组:{{reviewer.label}}</span>
+                    <span v-if="reviewer.type=='role'">角色:{{reviewer.label}}</span>
+                    <span v-if="reviewer.type=='member'">{{reviewer.label}} </span>
+                    <button class="btn btn-primary" @click="removeReviewer(reviewer)">移除</button>
+                  </div>
+                </div>
+              </div>
+            </div>Action：
+            <input type="text" v-model="data">
+            <button class="btn btn-primary" @click="updateModel">更改</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div v-if="type=='createAction'">33</div>
     <div v-if="type=='modifyAction'">44</div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 import go from "gojs";
+import _ from "lodash";
+import qs from "qs";
 export default {
-  data: function() {
+  data() {
     return {
       type: "template",
+      data: "",
+      userOptions: [],
+      groupOptions: [],
+      roleOptions: [],
+      workflowOptions:[],
+      user: null,
+      group: null,
+      role: null,
       myDiagram: null,
+      workflowTemplate:null,
+      workflowTemplates:[],
       template: {
         class: "GraphLinksModel",
         copiesKey: false,
         linkFromPortIdProperty: "fromPort",
         linkToPortIdProperty: "toPort",
         nodeDataArray: [
-          { category: "Comment", loc: "360 -10", text: "流程名称", key: -13 },
+          {
+            category: "Comment",
+            loc: "360 -5",
+            text: "流程名称",
+            key: -13
+          },
           { key: -1, category: "Start", loc: "175 0", text: "开始" },
-          { key: 0, loc: "-5 75", text: "Preheat oven to 375 F" },
           {
-            key: 1,
-            loc: "175 100",
-            text:
-              "In a bowl, blend: 1 cup margarine, 1.5 teaspoon vanilla, 1 teaspoon salt"
+            key: 8,
+            category: "common",
+            loc: "175 297",
+            text: "节点名称"
           },
           {
-            key: 2,
-            loc: "175 200",
-            text: "Gradually beat in 1 cup sugar and 2 cups sifted flour"
-          },
-          {
-            key: 3,
-            loc: "175 290",
-            text: "Mix in 6 oz (1 cup) Nestle's Semi-Sweet Chocolate Morsels"
-          },
-          {
-            key: 4,
-            loc: "175 380",
-            text: "Press evenly into ungreased 15x10x1 pan"
-          },
-          {
-            key: 5,
-            loc: "355 85",
-            text: "Finely chop 1/2 cup of your choice of nuts"
-          },
-          { key: 6, loc: "175 450", text: "Sprinkle nuts on top" },
-          { key: 7, loc: "175 515", text: "Bake for 25 minutes and let cool" },
-          { key: 8, loc: "175 585", text: "Cut into rectangular grid" },
-          { key: -2, category: "End", loc: "175 660", text: "结束" }
+            key: -2,
+            category: "End",
+            loc: "175 577",
+            text: "结束"
+          }
         ],
         linkDataArray: [
-          {
-            from: 1,
-            to: 2,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              139.7508972167969,
-              175,
-              149.7508972167969,
-              175,
-              153.96886215209963,
-              175,
-              153.96886215209963,
-              175,
-              158.18682708740235,
-              175,
-              168.18682708740235
-            ]
-          },
-          {
-            from: 2,
-            to: 3,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              231.81317291259768,
-              175,
-              241.81317291259768,
-              175,
-              245,
-              175,
-              245,
-              175,
-              248.18682708740232,
-              175,
-              258.1868270874023
-            ]
-          },
-          {
-            from: 3,
-            to: 4,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              321.8131729125976,
-              175,
-              331.8131729125976,
-              175,
-              335,
-              175,
-              335,
-              175,
-              338.1868270874023,
-              175,
-              348.1868270874023
-            ]
-          },
-          {
-            from: 4,
-            to: 6,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              411.8131729125976,
-              175,
-              421.8131729125976,
-              175,
-              422.9377243041992,
-              175,
-              422.9377243041992,
-              175,
-              424.0622756958008,
-              175,
-              434.0622756958008
-            ]
-          },
-          {
-            from: 6,
-            to: 7,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              465.9377243041992,
-              175,
-              475.9377243041992,
-              175,
-              478.53113784790037,
-              175,
-              478.53113784790037,
-              175,
-              481.1245513916016,
-              175,
-              491.1245513916016
-            ]
-          },
-          {
-            from: 7,
-            to: 8,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              538.8754486083984,
-              175,
-              548.8754486083984,
-              175,
-              550,
-              175,
-              550,
-              175,
-              551.1245513916016,
-              175,
-              561.1245513916016
-            ]
-          },
           {
             from: 8,
             to: -2,
             fromPort: "B",
             toPort: "T",
-            points: [
-              175,
-              608.8754486083984,
-              175,
-              618.8754486083984,
-              175,
-              623.7836629645769,
-              175,
-              623.7836629645769,
-              175,
-              628.6918773207553,
-              175,
-              638.6918773207553
-            ]
+            points: [175, 313, 175, 323, 175, 434, 175, 434, 175, 546, 175, 556]
           },
           {
             from: -1,
-            to: 0,
+            to: 8,
             fromPort: "B",
             toPort: "T",
-            points: [
-              175,
-              21.308122679244644,
-              175,
-              31.308122679244644,
-              175,
-              40.18519918752271,
-              -5,
-              40.18519918752271,
-              -5,
-              49.06227569580078,
-              -5,
-              59.06227569580078
-            ]
-          },
-          {
-            from: -1,
-            to: 1,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              21.308122679244644,
-              175,
-              31.308122679244644,
-              175,
-              40.77861273122389,
-              175,
-              40.77861273122389,
-              175,
-              50.24910278320313,
-              175,
-              60.24910278320313
-            ]
-          },
-          {
-            from: -1,
-            to: 5,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              175,
-              21.308122679244644,
-              175,
-              31.308122679244644,
-              175,
-              41.2163370354231,
-              355,
-              41.2163370354231,
-              355,
-              51.124551391601564,
-              355,
-              61.124551391601564
-            ]
-          },
-          {
-            from: 5,
-            to: 4,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              355,
-              108.87544860839844,
-              355,
-              118.87544860839844,
-              355,
-              116,
-              355,
-              116,
-              355,
-              332,
-              212.82068634033203,
-              332,
-              212.82068634033203,
-              338.1868270874023,
-              212.82068634033203,
-              348.1868270874023
-            ]
-          },
-          {
-            from: 0,
-            to: 4,
-            fromPort: "B",
-            toPort: "T",
-            points: [
-              -5,
-              90.93772430419921,
-              -5,
-              100.93772430419921,
-              -5,
-              100,
-              -5,
-              100,
-              -5,
-              332,
-              137.17931365966797,
-              332,
-              137.17931365966797,
-              338.1868270874023,
-              137.17931365966797,
-              348.1868270874023
-            ]
+            points: [175, 21, 175, 31, 175, 151, 175, 151, 175, 271, 175, 281]
           }
         ]
       },
       selectedNode: null
     };
   },
-  mounted() {},
+  filters: {
+    reviewerFilter(reviewers) {
+      let str = "";
+      for (let i of reviewers) {
+        if (str.length > 0) str += "\n";
+        str+=i.label;
+      }
+      return str;
+    }
+  },
+  mounted() {
+    var $this=this;
+    axios.get("/api/user/list").then(response => {
+      for (let i of response.data.data) {
+        $this.userOptions.push({
+          type: "user",
+          label: i.username,
+          value: i
+        });
+      }
+    });
+    axios.get("/api/group/list").then(response => {
+      for (let i of response.data.data) {
+        $this.groupOptions.push({
+          type: "group",
+          label: i.groupName,
+          value: i
+        });
+      }
+    });
+    axios.get("/api/role/list").then(response => {
+      for (let i of response.data.data) {
+        $this.roleOptions.push({
+          type: "role",
+          label: i.roleName,
+          value: i
+        });
+      }
+    });
+   
+    axios.get("/api/workflowTemplate/list").then(response => {
+      for (let i of response.data.data) {
+        $this.workflowOptions.push({
+          label: i.templateName,
+          value: i
+        });
+      }
+    });
+  },
   methods: {
+    saveWorkflowTemplate(){
+      let nodeData = this.myDiagram.model.nodeDataArray;
+      let linkData = this.myDiagram.model.linkDataArray;
+      let nodeMap = {};
+      let nodeArray = [];
+
+      var workflowTemplate = {id:this.workflowTemplate.value.id,templateModel:this.myDiagram.model.toJson()};
+      var toMap = {};
+      var fromMap = {};
+      for (let i of nodeData) {
+        switch (i.category) {
+          case "common":
+            nodeArray.push({
+              nodeKey: i.key,
+              templatename: i.text,
+              reviewers: i.prop.reviewers
+            });
+            break;
+          case "Comment":
+            workflowTemplate.templateName = i.text;
+            break;
+        }
+      }
+      for (let i of linkData) {
+        if (i.from == -1 || i.to == -2) continue;
+        if (toMap[i.from.toString()] == null) toMap[i.from.toString()] = [];
+        if (fromMap[i.to.toString()] == null) fromMap[i.to.toString()] = [];
+        toMap[i.from.toString()].push(i.to.toString());
+        fromMap[i.to.toString()].push(i.from.toString());
+      }
+
+      axios.post('/api/workflowTemplate/createOrUpdate',qs.stringify({
+        nodeArray:JSON.stringify(nodeArray),
+        fromMap:JSON.stringify(fromMap),
+        toMap:JSON.stringify(toMap),
+        workflowTemplate:JSON.stringify(workflowTemplate)
+      })).then(response=>console.log(JSON.stringify(response)));
+    },
+    createWorkflowTemplate() {
+      let nodeData = this.myDiagram.model.nodeDataArray;
+      let linkData = this.myDiagram.model.linkDataArray;
+      let nodeMap = {};
+      let nodeArray = [];
+      var workflowTemplate = {templateModel:this.myDiagram.model.toJson()};
+      var toMap = {};
+      var fromMap = {};
+      for (let i of nodeData) {
+        switch (i.category) {
+          case "common":
+            nodeArray.push({
+              nodeKey: i.key,
+              templatename: i.text,
+              reviewers: i.prop.reviewers
+            });
+            break;
+          case "Comment":
+            workflowTemplate.templateName = i.text;
+            break;
+        }
+      }
+      for (let i of linkData) {
+        if (i.from == -1 || i.to == -2) continue;
+        if (toMap[i.from.toString()] == null) toMap[i.from.toString()] = [];
+        if (fromMap[i.to.toString()] == null) fromMap[i.to.toString()] = [];
+        toMap[i.from.toString()].push(i.to.toString());
+        fromMap[i.to.toString()].push(i.from.toString());
+      }
+
+      axios.post('/api/workflowTemplate/createOrUpdate',qs.stringify({
+        nodeArray:JSON.stringify(nodeArray),
+        fromMap:JSON.stringify(fromMap),
+        toMap:JSON.stringify(toMap),
+        workflowTemplate:JSON.stringify(workflowTemplate)
+      })).then(response=>console.log(JSON.stringify(response)));
+
+    },
+    clear() {
+      this.user = null;
+      this.group = null;
+      this.role = null;
+    },
+    addReviewer() {
+      console.log("this.user:"+JSON.stringify(this.user));
+      if (this.user != null) {
+        this.selectedNode.data.prop.reviewers.push({
+          type: "user",
+          label: this.user.label,
+          reviewerId: this.user.value.id
+        });
+      } else if (this.role != null && this.group != null) {
+        this.selectedNode.data.prop.reviewers.push({
+          type: "member",
+          label: "组:" + this.group.label + " 角色:" + this.role.label,
+          reviewerId: this.group.value.id
+        });
+      } else if (this.role != null) {
+        this.selectedNode.data.prop.reviewers.push({
+          type: "role",
+          label: this.role.label,
+          reviewerId: this.role.value.id
+        });
+      } else if (this.group != null) {
+        this.selectedNode.data.prop.reviewers.push({
+          type: "group",
+          label: this.group.label,
+          reviewerId: this.group.value.id
+        });
+      }
+    },
+    removeReviewer(reviewer) {
+      this.selectedNode.data.prop.reviewers.splice(
+        this.selectedNode.data.prop.reviewers.indexOf(reviewer),
+        1
+      );
+    },
+    updateModel() {
+      console.log("myDiagram:" + this.myDiagram.model.toJson());
+      this.myDiagram.startTransaction();
+      this.myDiagram.updateAllTargetBindings();
+      this.myDiagram.commitTransaction("updated");
+    },
+    initModifyTemplate() {
+      console.log("value:"+JSON.stringify(this.workflowTemplate));
+      this.init('myModifyDiv',this.workflowTemplate.value.templateModel);
+    },
     initCreateTemplate() {
       this.type = "createTemplate";
-      this.init("myCreateDiv",JSON.stringify(this.template));
+      this.init("myCreateDiv", JSON.stringify(this.template));
     },
-    init(id,model) {
+    init(id, model) {
       var $this = this;
       // if (window.goSamples) goSamples(); // init for these samples -- you don't need to call this
       if (this.myDiagram) this.myDiagram.div = null;
@@ -387,7 +374,7 @@ export default {
       // define the Node templates for regular nodes
 
       myDiagram.nodeTemplateMap.add(
-        "", // the default category
+        "common", // the default category
         $(
           go.Node,
           "Table",
@@ -396,9 +383,16 @@ export default {
               var icon = node.findObject("Icon");
               if (node.isSelected) {
                 console.log("node:" + JSON.stringify(node.data));
-                console.log("data:" + JSON.stringify(myDiagram.model));
+                // console.log("data:" + myDiagram.model.toJson());
                 $this.selectedNode = node;
-                node.data.test = "111";
+                if (node.data.id != node.key) {
+                  console.log("1111");
+                  node.data.id = node.key;
+                  node.data.prop = {
+                    reviewers: []
+                  };
+                }
+
                 icon.fill = "#f53463";
               } else {
                 icon.fill = "#00A9C9";
@@ -410,24 +404,19 @@ export default {
           $(
             go.Panel,
             "Auto",
-            $(
-              go.Shape,
-              "Rectangle",
-              {
-                name: "Icon",
-                fill: "#00A9C9",
-                strokeWidth: 0
-              },
-              new go.Binding("figure", "figure")
-            ),
+            $(go.Shape, "Rectangle", {
+              name: "Icon",
+              fill: "#00A9C9",
+              strokeWidth: 0
+            }),
             $(
               go.TextBlock,
+              "common",
               textStyle(),
               {
                 margin: 8,
                 maxSize: new go.Size(160, NaN),
-                wrap: go.TextBlock.WrapFit,
-                editable: true
+                wrap: go.TextBlock.WrapFit
               },
               new go.Binding("text").makeTwoWay()
             )
