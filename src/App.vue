@@ -8,7 +8,7 @@
 <script>
 require("bootstrap");
 require("bootstrap/dist/css/bootstrap.css");
-
+require('bootstrap-vue/dist/bootstrap-vue.css');
 require("@fortawesome/fontawesome-free");
 require("@fortawesome/fontawesome-free/css/all.css");
 require("animate.css");
@@ -18,22 +18,6 @@ import axios from "axios";
 export default {
   components: {
     Header
-  },
-  created() {
-    
-    // console.log("beforeCreated");
-    // var $this = this;
-    // axios.get("/api/user").then(function(response) {
-    //   if (response.data.success) {
-    //     let user = response.data.data;
-    //     if (user != null) {
-    //       console.log("set user");
-    //       $this.$store.commit("setUser", user);
-    //       service.createWebSocket();
-    //       service.init();
-    //     }
-    //   }
-    // });
   }
 };
 </script>

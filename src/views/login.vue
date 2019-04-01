@@ -86,7 +86,7 @@ export default {
         .then(function(response) {
           if (response.data.success) {
             sessionStorage.setItem("user", JSON.stringify(response.data.data));
-            $this.$store.commit("setUser", response.data.data);
+            $this.$store.commit("setValue", {name:'user',value:response.data.data});
             $this.$store.commit(
               "setUnreadMessage",
               -$this.$store.state.unreadMessageCount

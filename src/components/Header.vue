@@ -43,12 +43,15 @@
             <li class="nav-item dropdown">
               <router-link class="nav-item nav-link mr-md-2" to="/user">
                 {{$store.state.user.username}}
-                <span class="badge badge-danger" v-if="$store.state.unreadMessageCount>0">{{$store.state.unreadMessageCount}}</span>
+                <b-badge variant="danger" v-if="$store.state.unreadMessageCount>0"> {{$store.state.unreadMessageCount}}</b-badge>
               </router-link>
 
               <div class="dropdown-menu dropdown-menu-left" aria-labelledby="bd-versions">
                 <!-- <router-link class="dropdown-item" to="/user">用户信息</router-link> -->
                 <router-link class="dropdown-item" to="/message">消息</router-link>
+                <router-link class="dropdown-item" to="/workflow">流程</router-link>
+                <router-link class="dropdown-item" to="/template">模版</router-link>
+
                 <router-link class="dropdown-item" to="/admin" v-if="$store.state.user.members.some(x=>x.role.roleName='管理员')">管理</router-link>
 
                 <button class="dropdown-item" @click="logout">登出</button>
@@ -141,8 +144,8 @@ export default {
     logout() {
       var $this = this;
       axios.get("/api/user/logout").then(function() {
-        $this.$store.commit("setUser", null);
-        $this.$store.commit("setWS",null);
+        $this.$store.commit("setValue", {name:'user',value:null});
+        $this.$store.commit("setValue",{name:'ws',value:null});
         sessionStorage.clear();
 
         $this.$router.push("/");

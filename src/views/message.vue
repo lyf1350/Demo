@@ -4,9 +4,7 @@
     <div class="modal" id="modal">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
-          <div class="modal-header">
-            
-          </div>
+          <div class="modal-header"></div>
 
           <div class="modal-content">
             <div class="form-group">
@@ -95,13 +93,8 @@ export default {
     var $this = this;
     CKEditor.create(document.querySelector("#editor"), {
       language: "zh-cn"
-    })
-      .then(function(editor) {
-        $this.editor = editor;
-      })
-      .catch(function(error) {
-        console.log("error:" + error);
-      });
+    }).then(editor => ($this.editor = editor));
+
     axios.get("/api/user/list").then(response => {
       for (let i of response.data.data) {
         $this.options.push({
@@ -158,9 +151,9 @@ export default {
               id: this.$store.state.msg[index].id
             }
           })
-          .then(function(response) {
-            console.log("data:" + JSON.stringify(response.data));
-          });
+          .then(response =>
+            console.log("data:" + JSON.stringify(response.data))
+          );
         this.$store.state.msg[index].state = 1;
         this.$store.commit("setUnreadMessage", -1);
       }
@@ -173,11 +166,12 @@ export default {
             id: this.$store.state.msg[index].id
           }
         })
-        .then(function(response) {
-          console.log("data:" + JSON.stringify(response.data));
-        });
+        .then(response => console.log("data:" + JSON.stringify(response.data)));
       this.$store.state.msg.splice(index, 1);
-      this.$store.commit("setMsg", this.$store.state.msg);
+      this.$store.commit("setValue", {
+        name:'msg',
+        value:this.$store.state.msg
+      });
     },
     filterFunction(option, label, search) {
       return (

@@ -15,6 +15,7 @@
     "blueimp-md5": "^2.10.0",
     "bootstrap": "^4.3.1",
     "bootstrap-table": "^1.14.1",
+    "bootstrap-vue": "^2.0.0-rc.16",
     "circular-json": "^0.5.9",
     "dragtable": "^2.0.12",
     "gojs": "^2.0.4",
@@ -24,6 +25,7 @@
     "jquery-ui": "^1.12.1",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
+    "pdfjs-dist": "^2.0.943",
     "popper.js": "^1.14.7",
     "qs": "^6.6.0",
     "select2": "^4.0.6-rc.1",
@@ -31,6 +33,7 @@
     "vue-router": "^3.0.1",
     "vue-select": "^2.6.0",
     "vue-sticky-position": "^2.0.0",
+    "vue-upload-component": "^2.8.20",
     "vuex": "^3.1.0"
   },
   "devDependencies": {

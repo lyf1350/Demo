@@ -6,29 +6,28 @@ Vue.use(Vuex);
 const state = {
     user: null,
     ws: null,
-    msg:[],
-    unreadMessageCount:0
+    msg: [],
+    unreadMessageCount: 0,
+    nodes: [],
+    unexecutedNodeCount: 0,
+    pending:[],
+    executed:[],
+    finished:[]
 }
 
 const mutations = {
-    setUser(state, user) {
-        state.user = user;
+    setUnreadMessage(state, count) {
+        state.unreadMessageCount += count;
+        if (state.unreadMessageCount < 0)
+            state.unreadMessageCount = 0;
     },
-    setWS(state, ws) {
-        state.ws = ws;
-    },
-    setMsg(state,msg){
-        state.msg=msg;
-    },
-    setUnreadMessage(state,count){
-        state.unreadMessageCount+=count;
-        if(state.unreadMessageCount<0)
-            state.unreadMessageCount=0;
+    setValue(state,value){
+        state[value.name]=value.value;
     }
-    
+
 }
 
 export default new Vuex.Store({
-    state:state,
-    mutations:mutations
+    state: state,
+    mutations: mutations
 })

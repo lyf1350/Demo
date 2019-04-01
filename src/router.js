@@ -42,10 +42,10 @@ export default new Router({
     }, {
       path: "/login",
       beforeEnter: (to, from, next) => {
-        
-        if (sessionStorage.getItem('user')==null)
+
+        if (sessionStorage.getItem('user') == null)
           next();
-        else{
+        else {
           console.log("???");
           next('/');
         }
@@ -67,14 +67,13 @@ export default new Router({
     }, {
       path: "/admin",
       beforeEnter: (to, from, next) => {
-        next();
-        // if (store.state.user==null)
-        //   next('/login');
-        // else if(store.state.user.members.some(e=>e.role.roleName="管理员")){
-        //   next();
-        // }else{ 
-        //   next('/auth');
-        // }
+        if (store.state.user==null)
+          next('/login');
+        else if(store.state.user.members.some(e=>e.role.roleName="管理员")){
+          next();
+        }else{ 
+          next('/auth');
+        }
       },
       component: () =>
         import("./views/admin.vue")

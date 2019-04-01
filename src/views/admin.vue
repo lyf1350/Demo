@@ -114,7 +114,7 @@ export default {
     });
   },
   watch: {
-    person: function(newVal) {
+    person: newVal=>{
       if (newVal == null) this.person = {};
     }
   },

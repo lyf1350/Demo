@@ -5,11 +5,14 @@ import store from "./store";
 import $ from "jquery";
 import vSelect from "vue-select";
 import service from "./assets/js/service";
+import BootstrapVue from 'bootstrap-vue';
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+Vue.use(BootstrapVue);
 Vue.config.productionTip = false;
 Vue.component('v-select',vSelect);
 if(store.state.user==null&&sessionStorage.getItem('user')!=null){
-  store.commit('setUser',JSON.parse(sessionStorage.getItem('user')));
+  store.commit('setValue',{name:'user',value:JSON.parse(sessionStorage.getItem('user'))});
   service.createWebSocket();
   service.init();
 }
