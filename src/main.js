@@ -6,9 +6,11 @@ import $ from "jquery";
 import vSelect from "vue-select";
 import service from "./assets/js/service";
 import BootstrapVue from 'bootstrap-vue';
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+import VueUploadComponent  from "vue-upload-component";
 
 Vue.use(BootstrapVue);
+Vue.component('file-upload', VueUploadComponent);
 Vue.config.productionTip = false;
 Vue.component('v-select',vSelect);
 if(store.state.user==null&&sessionStorage.getItem('user')!=null){

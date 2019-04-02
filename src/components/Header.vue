@@ -25,6 +25,9 @@
           <li class="nav-item">
             <router-link class="nav-link" to="/table">表格示例</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/file">文件上传</router-link>
+          </li>
         </ul>
       </div>
 
