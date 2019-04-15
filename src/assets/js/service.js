@@ -18,7 +18,7 @@ export default {
                 store.commit('setUnreadMessage', 1);
                 store.commit('setValue', {name:'msg',value:store.state.msg});
             }else if(tempMsg.type=="workflow"){
-
+                console.log("workflow");
             }
         };
         ws.onclose = function (event) {
@@ -57,11 +57,10 @@ export default {
             .then(function (response) {
                 let data = response.data.data;
                 let count = 0;
-                console.log("node data:" + JSON.stringify(data));
                 if(response.data.success){
-                    console.log("pending:"+JSON.stringify(data.pending));
                     store.commit('setValue',{name:'pending',value:data.pending});
                     store.commit('setValue',{name:'finished',value:data.finished});
+                    store.commit('setValue',{name:'executed',value:data.executed});
 
                 }
             });

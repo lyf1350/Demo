@@ -3,24 +3,26 @@
     <div class="d-flex">
       <button class="btn btn-primary" @click="initCreateTemplate">新建流程模版</button>
       <button class="btn btn-primary" @click="type='modifyTemplate'">修改流程模版</button>
-      <button class="btn btn-primary" @click="type='createAction'">新建Action模版</button>
-      <button class="btn btn-primary" @click="type='modifyAction'">修改Action模版</button>
+      <!-- <button class="btn btn-primary" @click="type='createAction'">新建Action模版</button> -->
+      <!-- <button class="btn btn-primary" @click="type='modifyAction'">修改Action模版</button> -->
+      <b-btn class=" ml-auto" v-if="type.length>0" @click="showInfo=!showInfo">{{showInfo?'显示流程页面':'显示信息页面'}}</b-btn>
+
       <button
-        class="btn btn-success ml-auto"
+        class="btn btn-success  "
         @click="createWorkflowTemplate"
         v-if="type=='createTemplate'"
       >新建</button>
       <button
-        class="btn btn-success ml-auto"
+        class="btn btn-success p-2"
         @click="saveWorkflowTemplate"
         v-show="workflowTemplate&&type=='modifyTemplate'"
       >保存</button>
     </div>
 
-    <div v-show="type=='createTemplate'">
+    <div v-show="!showInfo&&type=='createTemplate'">
       <div id="myCreateDiv" style="flex-grow: 1; height: 750px; border: solid 1px black"></div>
     </div>
-    <div v-show="type=='modifyTemplate'">
+    <div v-show="!showInfo&&type=='modifyTemplate'">
       流程模版
       <v-select
         :options="workflowOptions "
@@ -90,7 +92,8 @@ import service from "@/assets/js/service";
 export default {
   data() {
     return {
-      type: "template",
+      type: "",
+      showInfo:false,
       data: "",
       userOptions: [],
       groupOptions: [],
@@ -273,7 +276,6 @@ export default {
         toMap[i.from.toString()].push(i.to.toString());
         fromMap[i.to.toString()].push(i.from.toString());
       }
-
       axios
         .post(
           "/api/workflowTemplate/createOrUpdate",
@@ -339,10 +341,13 @@ export default {
           "myModifyDiv",
           this.workflowTemplate.value.templateModel
         );
+
     },
     initCreateTemplate() {
       this.type = "createTemplate";
       service.initTemplate(this, "myCreateDiv", JSON.stringify(this.template));
+
+
     }
   }
 };

@@ -1,5 +1,6 @@
 <template>
   <div class="my-box">
+    <b-btn @click="test">test</b-btn>
     <div id="pic1"></div>
     <div id="pic2"></div>
     <div id="pic3"></div>
@@ -25,7 +26,11 @@ export default {
   data() {
     return {
       data: "da",
-      loading: false
+      loading: false,
+      series:[],
+      chart:null
+      ,options:{}
+
     };
   },
   methods: {
@@ -35,9 +40,22 @@ export default {
     Highcharts.setOptions({
       credits: {
         enabled: false
+      },
+      lang:{
+        contextButtonTitle:'导出',
+        downloadCSV:"导出CSV",
+        downloadJPEG:"导出JPEG",
+        downloadPDF:"导出PDF",
+        downloadPNG:"导出PNG",
+        downloadSVG:"导出SVG",
+        downloadXLS:"导出XLS",
+        resetZoom:"重置",
+        printChart:"打印图表",
+        viewData:"查看数据",
+        openInCloud:"云端打开"
       }
     });
-    Highcharts.chart("pic1", {
+    this.options={
       chart: {
         type: "column",
         zoomType: "x",
@@ -89,77 +107,9 @@ export default {
           borderWidth: 0
         }
       },
-      series: [
-        {
-          name: "北京",
-          data: [
-            49.9,
-            71.5,
-            106.4,
-            129.2,
-            144.0,
-            176.0,
-            135.6,
-            148.5,
-            216.4,
-            194.1,
-            95.6,
-            54.4
-          ]
-        },
-        {
-          name: "上海",
-          data: [
-            83.6,
-            78.8,
-            98.5,
-            93.4,
-            106.0,
-            84.5,
-            105.0,
-            104.3,
-            91.2,
-            83.5,
-            106.6,
-            92.3
-          ]
-        },
-        {
-          name: "广州",
-          data: [
-            48.9,
-            38.8,
-            39.3,
-            41.4,
-            47.0,
-            48.3,
-            59.0,
-            59.6,
-            52.4,
-            65.2,
-            59.3,
-            51.2
-          ]
-        },
-        {
-          name: "深圳",
-          data: [
-            42.4,
-            33.2,
-            34.5,
-            39.7,
-            52.6,
-            75.5,
-            57.4,
-            60.4,
-            47.6,
-            39.1,
-            46.8,
-            51.1
-          ]
-        }
-      ]
-    });
+      series: []
+    }
+    this.chart=Highcharts.chart("pic1",this.options );
 
     Highcharts.chart("pic2", {
       chart: {
@@ -479,6 +429,32 @@ export default {
         pointFormat: "<b>{point.y}</b> (目标： {point.target})"
       }
     });
+  },methods:{
+    test(){
+      let temp=[];
+      let cities=['北京','上海','广州','深圳']
+      for(let i of cities){
+        let data=[];
+        for(let j=0;j<10;j++){
+          data.push(Math.random()*200);
+        }
+        temp.push({
+          name:i,
+          data:data
+        })
+      }
+      this.options.series=temp;
+      console.log("options11:"+JSON.stringify(temp));
+    this.chart=Highcharts.chart("pic1",this.options );
+    // this.chart.exportChartLocal({
+		// 	type: 'application/pdf',
+		// 	filename: 'my-pdf'
+		// })
+      console.log(this.chart.getSVG());
+      // this.chart.update({
+      //   series:temp
+      // },true);
+    }
   }
 };
 </script>

@@ -54,14 +54,15 @@
               <div class="tab-pane show active" id="pending">
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item" v-for="(node,index) in $store.state.pending" :key="'node'+index">
-                    <a @click="currentNode=node;currentWorkflow=null">{{node.nodeTemplate.templateName}}   发起人:{{node.workflow.workflowUser.username}} 开始时间:{{node.startTime}}</a>
+                    <a @click="currentNode=node;currentWorkflow=null">{{node.nodeTemplate.templateName}}   发起人:{{node.workflow.workflowUser.username}} 开始时间:{{node.startTime|dateFormatter}}</a>
                   </li>
                 </ul>
               </div>
               <div class="tab-pane" id="executed">
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item" v-for="(node,index) in $store.state.executed" :key="'node'+index">
-                    <a href="#">{{node.nodeTemplate.templateName}}</a>
+                    <a href="#" @click="currentNode=null;currentWorkflow=node">{{node.workflowTemplate.templateName}} 发起人:{{node.workflowUser.username}} 发起时间:{{node.createTime|dateFormatter}}</a>
+                    
                   </li>
                 </ul>
               </div>
@@ -116,14 +117,13 @@ import qs from "qs";
 import service from "../assets/js/service";
 import node from "@/components/Node.vue";
 import workflow from "@/components/Workflow.vue";
-
+import moment from "moment";
 export default {
   data() {
     return {
       workflowTemplate: null,
       workflowOptions: [],
       selectedNode: null,
-      nodes: ["test1", "test2", "test3"],
       currentNode:null,
       currentWorkflow:null
     };
@@ -151,6 +151,7 @@ export default {
   },
   mounted() {
     var _this = this;
+    console.log("executed:"+JSON.stringify(this.$store.state.executed));
     axios.get("/api/workflowTemplate/list").then(response => {
       for (let i of response.data.data) {
         _this.workflowOptions.push({
@@ -172,21 +173,6 @@ export default {
         str += i.label;
       }
       return str;
-    },dateFormatter(val) {
-      if(val==null)
-        return "";
-      let date = new Date(val);
-      return (
-        date.getFullYear() +
-        "-" +
-        (date.getMonth() + 1) +
-        "-" +
-        date.getDate() +
-        " " +
-        date.getHours() +
-        ":" +
-        date.getMinutes()
-      );
     }
   }
 };

@@ -1,6 +1,6 @@
 <template>
   <div class="border border-1 my-box">
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">发送消息</button>
+    <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modal">发送消息</button>
     <div class="modal" id="modal">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
@@ -90,6 +90,20 @@ export default {
     };
   },
   mounted() {
+    // $.fn.modal.Constructor.prototype._enforceFocus = function() {
+    //             var $modalElement = this._element;
+    //             for(let i in this){
+    //               console.log("key:"+i);
+    //             }
+    //             console.log("element:"+this._element);
+    //             $(document).on('focusin.modal',function(e) {
+    //                 if ($modalElement[0] !== e.target
+    //                     && $(e.target).parentsUntil('*[role="dialog"]').length === 0&& !$(e.target.parentNode).hasClass('cke_dialog_ui_input_textarea')) {
+    //                     $modalElement.focus();
+    //                 }
+    //             });
+    //         };
+    console.log("maginificent:"+$.magnificPopup);
     var $this = this;
     CKEditor.create(document.querySelector("#editor"), {
       language: "zh-cn"
@@ -169,8 +183,8 @@ export default {
         .then(response => console.log("data:" + JSON.stringify(response.data)));
       this.$store.state.msg.splice(index, 1);
       this.$store.commit("setValue", {
-        name:'msg',
-        value:this.$store.state.msg
+        name: "msg",
+        value: this.$store.state.msg
       });
     },
     filterFunction(option, label, search) {
@@ -178,12 +192,6 @@ export default {
         (label || "").toLowerCase().indexOf(search.toLowerCase()) > -1 ||
         option.value.toLowerCase().indexOf(search.toLowerCase()) > -1
       );
-    }
-  },
-  filters: {
-    dateFormatter(value) {
-      if (value != null) return moment(value).format('"YYYY-MM-DD HH:mm:ss"');
-      else return "";
     }
   }
 };

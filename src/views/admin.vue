@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">管理角色</button>
+    <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modal">管理角色</button>
     <div class="modal" id="modal">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal2">管理组</button>
+    <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#modal2">管理组</button>
     <div class="modal" id="modal2">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
@@ -29,7 +29,7 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal1">用户管理</button>
+    <button type="button" class="btn btn-warning btn-block" data-toggle="modal" data-target="#modal1">用户管理</button>
     <div class="modal" id="modal1">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">

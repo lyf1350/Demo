@@ -1,70 +1,28 @@
 <template>
   <div>
     <!-- {{$store.state.pending}} -->
-    <button data-toggle="modal" data-target="#modal" class="btn btn-primary" @click="test1">{{data}}</button>
-    <button @click="test2" class="btn btn-primary">{{data}}写入2</button>
-    <button @click="test1" class="btn btn-primary">{{data}}写入1</button>
-    <node test1="def"></node>
+    <button data-toggle="modal" data-target="#modal" class="btn btn-primary" @click="test1">modal</button>
+    <button @click="test2" class="btn btn-primary">写入2</button>
+    <button @click="test1" class="btn btn-primary">写入1</button>
     <br>
-    <!-- <br>message:
-    <input type="text" v-model="message">
-
-    <br>type:
-    <input type="text" v-model="type">
-
-    <div id="editor"></div>
-    <br>
-    <label v-if="loading">{{$store.state.user}}</label>
-    <v-select :options="options " taggable v-model="to">
-      <span slot="no-options">未找到搜索结果</span>
-      <template slot="option" scope="option">
-        <span
-          class="fas"
-          :class="option.type=='role'?'fa-user-tag':option.type=='group'?'fa-users':'fa-user'"
-        />
-        {{option.label}}
-      </template>
-    </v-select>-->
-    <ul>
-      <li v-for="file in files" :key="file.name">{{file.name}} Success: {{file.success}}</li>
-    </ul>
-    <file-upload
-      ref="upload"
-      v-model="files"
-      post-action="/api/file/upload"
-      @input-file="inputFile"
-      class="btn btn-primary"
-      :multiple="true"
-    >
-      <i class="fa fa-plus"></i>
-      Select files
-    </file-upload>
-    <b-button
-      v-show="!$refs.upload || !$refs.upload.active"
-      @click.prevent="$refs.upload.active = true"
-      type="button"
-    >Start upload</b-button>
-    <button
-      v-show="$refs.upload && $refs.upload.active"
-      @click.prevent="$refs.upload.active = false"
-      type="button"
-    >Stop upload</button>
-    <div id="modal" class="modal">
-      <div class="modal-dialog" style="max-width:100%">
-        <div class="modal-content">
-          <iframe
-            :src="src"
-            style="max-height:2000px;width:100%;min-height:650px"
-            scrolling="no"
-          ></iframe>
-        </div>
-      </div>
+    <b-dropdown no-caret variant="nav-link">
+      <template slot="button-content">aaass</template>
+      <b-dropdown-item>aaa</b-dropdown-item>
+    </b-dropdown>
+    <b-btn v-b-modal.modal>test modal</b-btn>
+    {{to}}
+    <b-form-input v-model="text" placeholder="Enter your name" readonly draggable></b-form-input>
+    {{message}}
+    {{testData}}
+    <div @drop="test2" @dragover.prevent>
+      <p>asdasd</p>
+      <span>fffff</span>
     </div>
-    <br>已上传文件:
-    <ul>
-      <li v-for="file in uploadedFiles" :key="file.id">{{file.fileName}} <b-button data-toggle="modal" data-target="#modal" class="btn btn-primary" @click="test1(file.uuid)">预览</b-button>
-      <b-button @click="download(file.uuid)">下载</b-button></li>
-    </ul>
+    <b-table :items="data" :fields="fields" hover responsive fixed/>
+
+    <b-modal id="modal" hide-footer hide-header>1234</b-modal>
+    <div id="editor_holder"></div>
+    <!-- <layout :layout="testLayout" :value="testData"/> -->
   </div>
 </template>
 
@@ -77,63 +35,230 @@ import go from "gojs";
 import circular from "circular-json";
 import pdf from "pdfjs-dist";
 import node from "@/components/Node";
-
+import test from "@/components/TestComponent";
+import layout from "@/components/Layout";
+import _ from "lodash";
+import JSONEditor from "@json-editor/json-editor";
 export default {
   data() {
     return {
-      data: "测试",
+      temp: {},
       loading: false,
       message: "aaa",
-      to: "",
+      to: "abc",
       type: "default",
       editor: null,
-      testData: "",
+      testData: {},
+      fields2: [
+        {
+          key: "test1",
+          label: "测试1",
+          type: "string"
+        },
+        {
+          key: "test2",
+          label: "测试2",
+          type: "string"
+        }
+      ],
+      selected: true,
+      index: null,
+      selectedTable: {},
       options: [],
       show: false,
       files: [],
       src: "",
-      uploadedFiles: []
+      uploadedFiles: [],
+      test: "",
+      text: "abc",
+      data: [],
+      fields: [],
+      html: "<Test />aabbcc",
+      config: {
+        editable: true,
+        label: "test",
+        type: "string",
+        selectable: true,
+        options: ["a", "b", "c", "d"]
+      },
+      dataArray: [
+        {
+          test1: "111",
+          test2: "222"
+        }
+      ],
+      testLayout: null,
+      layout: [
+        {
+          key: "f",
+          label: "test2",
+          row: 1,
+          col: 2,
+          type: "file",
+          selectable: true,
+          options: ["a", "b", "c"],
+          editable: true,
+          showLabel: true,
+          multiple: true
+        },
+        {
+          key: "a",
+          label: "test1",
+          row: 5,
+          col: 2,
+          type: "string",
+          selectable: true,
+          options: ["a", "b", "c"],
+          editable: true,
+          showLabel: true
+        },
+        {
+          key: "b",
+          label: "test2",
+          row: 3,
+          col: 2,
+          type: "number",
+          editable: true,
+          showLabel: true,
+          fields: [
+            {
+              key: "",
+              label: "",
+              type: ""
+            }
+          ]
+        },
+        {
+          key: "c",
+          label: "test2",
+          row: 3,
+          col: 1,
+          type: "date",
+          editable: true,
+          fields: [
+            {
+              key: "",
+              label: "",
+              type: ""
+            }
+          ],
+          showLabel: true
+        },
+        {
+          key: "e",
+          label: "test5",
+          type: "table",
+          row: 4,
+          col: 3,
+          editable: true,
+          fields: [
+            {
+              key: "test1",
+              label: "测试1",
+              type: "string",
+              editable: true,
+              selectable: true,
+              options: ["a", "b", "c", "d"]
+            },
+            {
+              key: "test2",
+              label: "测试2",
+              type: "string",
+              selectable: false
+            }
+          ]
+        }
+      ]
     };
   },
   components: {
-    Node: node
+    Node: node,
+    Test: test,
+    layout: layout
   },
   created() {},
   mounted() {
+    var element = document.getElementById("editor_holder");
+
+    var editor = new JSONEditor(element, {
+      theme: "bootstrap4",
+      schema: {
+        type: "object",
+        title: "流程信息页面布局设置",
+        properties: {
+          make: {
+            type: "string",
+            enum: ["Toyota", "BMW", "Honda", "Ford", "Chevy", "VW"]
+          },
+          model: {
+            type: "string"
+          },
+          year: {
+            type: "integer",
+            title:"年份",
+            enum: [
+              1995,
+              1996,
+              1997,
+              1998,
+              1999,
+              2000,
+              2001,
+              2002,
+              2003,
+              2004,
+              2005,
+              2006,
+              2007,
+              2008,
+              2009,
+              2010,
+              2011,
+              2012,
+              2013,
+              2014
+            ],
+            default: 2008
+          },
+          safety: {
+            type: "integer",
+            format: "rating",
+            maximum: "5",
+            exclusiveMaximum: false,
+            readonly: false
+          }
+        }
+      },
+      iconlib:'fontawesome5',
+      compact:true,
+      object_layout:'normal'
+    });
     var $this = this;
     axios.get("/api/file/list").then(response => {
       if (response.data.success) {
         $this.uploadedFiles = response.data.data;
       }
     });
-    // this.options.push({
-    //   label: "abc",
-    //   value: "ddd",
-    //   icon: "fas fa-user",
-    //   type: "user"
-    // });
-    // this.options.push({
-    //   label: "ef",
-    //   value: "f",
-    //   icon: "fas fa-users",
-    //   type: "group"
-    // });
-    // this.options.push({
-    //   label: "dd",
-    //   value: "b",
-    //   icon: "fas fa-user-tag",
-    //   type: "role"
-    // });
-    // CKEditor.create(document.querySelector("#editor"), {
-    //   language: "zh-cn"
-    // })
-    //   .then(function(editor) {
-    //     $this.editor = editor;
-    //     console.log("created");
-    //   })
-    //   .catch(function(error) {
-    //     console.log("error:" + error);
-    //   });
+    var test = {};
+    var test2 = [];
+    for (var i of this.layout) {
+      if (test[i.row] == undefined || test[i.row] == null) {
+        test[i.row] = [];
+      }
+      test[i.row].push(i);
+    }
+    for (var i in test) {
+      test[i].sort((a, b) => {
+        return a.col < b.col ? -1 : 1;
+      });
+      test2.push(test[i]);
+    }
+    test2.sort((a, b) => {
+      return a[0].row < b[0].row ? -1 : 1;
+    });
+    this.testLayout = test2;
+    console.log("test:" + JSON.stringify(test2));
+
     console.log("mounted");
     // init();
   },
@@ -148,6 +273,11 @@ export default {
       if (newFile && oldFile && !newFile.active && oldFile.active) {
         // Get response data
         console.log("response", newFile.response);
+        if (newFile.response.success && newFile.key) {
+          if (this.testData[newFile.key] == null)
+            this.testData[newFile.key] = [];
+          this.testData[newFile.key].push(newFile.response.data);
+        }
         if (newFile.xhr) {
           //  Get the response status code
           console.log("status", newFile.xhr.status);
@@ -176,14 +306,74 @@ export default {
         newFile.blob = URL.createObjectURL(newFile.file);
       }
     },
-    download(uuid){
-      window.open("/api/file/download/"+uuid)
+    download(uuid) {
+      window.open("/api/file/download/" + uuid);
     },
-    test1(uuid) {
-      this.src="/api/file/"+uuid;
+    upload(key) {
+      for (var i of this.temp[key]) {
+        i.key = key;
+      }
+      this.$refs["upload" + key][0].active = true;
     },
-    test2() {
-      console.log("dest:" + JSON.stringify(this.to));
+    test1() {
+      var _this = this;
+      this.fields = [
+        {
+          key: "file_name",
+          label: "文件名"
+        },
+        {
+          key: "suffix",
+          label: "后缀",
+          sortable: true,
+          variant: "danger"
+        }
+      ];
+      axios.get("/api/test").then(response => {
+        console.log("response:" + JSON.stringify(response.data));
+        _this.data = response.data.data;
+      });
+      // this.src = "/api/file/" + uuid;
+    },
+    dragover(ev) {
+      event.preventDefault();
+    },
+    addRow(key) {
+      this.temp[key] = {};
+      this.testData[key].push({});
+    },
+    removeRow(key) {
+      console.log(this.temp[key]);
+      let arr = [];
+      for (let i in this.temp[key]) {
+        if (this.temp[key][i]) arr.push(i);
+      }
+      _.pullAt(this.testData[key], arr);
+      this.temp[key] = {};
+      this.testData[key].sort();
+    },
+    rowSelected(key) {
+      console.log("select1");
+
+      if (!this.selected) {
+        return;
+      }
+      this.selected = false;
+      console.log("select2");
+
+      if (this.temp[key] == null) this.temp[key] = {};
+      this.temp[key][this.index] =
+        this.temp[key][this.index] == null ? true : !this.temp[key][this.index];
+    },
+    rowClicked(item, index, event) {
+      console.log("click");
+      this.selected = true;
+      this.index = index;
+    },
+    test2(ev) {
+      // console.log(ev);
+      console.log(this.$refs["test"]);
+      // console.log(this.temp);
       // pdf.getDocument("/api/test/1").then(
       //   pdf => {
       //     pdf.getPage(1).then(page => {

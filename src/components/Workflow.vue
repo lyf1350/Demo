@@ -3,6 +3,8 @@
     <b-tabs card>
       <b-tab title="流程信息">
         流程名称:{{workflow.workflowTemplate.templateName}}
+        流程ID:{{workflow.id}}
+
         <br>
       </b-tab>
       <b-tab @click="show" title="流程图">
@@ -10,7 +12,7 @@
       </b-tab>
       <b-tab title="流程日志">
         <div>
-          <b-table :items="logs" responsive></b-table>
+          <b-table :items="logs" responsive ></b-table>
         </div>
       </b-tab>
     </b-tabs>
@@ -40,7 +42,8 @@ export default {
       test: "123",
       selectedNode: null,
       logs: [],
-      remark: ""
+      remark: "",
+      currentPage:1
     };
   },
   props: {
@@ -55,22 +58,6 @@ export default {
         this,
         "nodeDiv",
         this.workflow.workflowTemplate.templateModel,"#nodeProp"
-      );
-    },
-    dateFormatter(val) {
-      if(val==null)
-        return "";
-      let date = new Date(val);
-      return (
-        date.getFullYear() +
-        "-" +
-        (date.getMonth() + 1) +
-        "-" +
-        date.getDate() +
-        " " +
-        date.getHours() +
-        ":" +
-        date.getMinutes()
       );
     }
   },

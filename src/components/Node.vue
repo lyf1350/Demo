@@ -4,20 +4,22 @@
       <b-tab title="流程信息">
         流程名称:{{node.workflow.workflowTemplate.templateName}}
         <br>
+        流程ID:{{node.workflow.id}}
+        <br>
         节点名称:{{node.nodeTemplate.templateName}}
         <br>
         <label>意见:</label>
         <b-form-input type="text" v-model="remark"/>
         <br>
-        <b-button variant="success" @click="execute('approve')">同意</b-button>
-        <b-button variant="danger" @click="execute('refuse')">拒绝</b-button>
+        <b-button class="btn-block" variant="success" @click="execute('approve')">同意</b-button>
+        <b-button class="btn-block"  variant="danger" @click="execute('refuse')">拒绝</b-button>
       </b-tab>
       <b-tab @click="show" title="流程图">
         <div id="nodeDiv" style="flex-grow: 1; height: 750px; border: solid 1px black"></div>
       </b-tab>
       <b-tab title="流程日志">
         <div>
-          <b-table :items="logs" responsive></b-table>
+          <b-table :items="logs" responsive hover :filter="filterFunction"></b-table>
         </div>
       </b-tab>
     </b-tabs>
@@ -40,6 +42,7 @@
 import service from "@/assets/js/service";
 import axios from "axios";
 import qs from "qs";
+import moment from "moment";
 export default {
   data() {
     return {
@@ -64,22 +67,7 @@ export default {
         this.node.workflow.workflowTemplate.templateModel,"#nodeProp"
       );
     },
-    dateFormatter(val) {
-      if(val==null)
-        return "";
-      let date = new Date(val);
-      return (
-        date.getFullYear() +
-        "-" +
-        (date.getMonth() + 1) +
-        "-" +
-        date.getDate() +
-        " " +
-        date.getHours() +
-        ":" +
-        date.getMinutes()
-      );
-    },
+    
     execute(decision) {
       axios.post(
         "/api/node/execute",
@@ -89,6 +77,9 @@ export default {
           decision: decision == "approve" ? "同意" : "拒绝"
         })
       );
+    },filterFunction(value){
+      console.log("value:"+JSON.stringify(value));
+      return true;
     }
   },
   watch: {

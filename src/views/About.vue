@@ -46,6 +46,10 @@ export default {
     contentData.push({ id: 5, content: "权限配置", contentState: "success" });
     contentData.push({ id: 6, content: "审核流程", contentState: "success" });
     contentData.push({ id: 7, content: "文件预览", contentState: "success" });
+    contentData.push({ id: 8, content: "图表配置", contentState: "warning" });
+    contentData.push({ id: 9, content: "流程信息显示", contentState: "secondary" });
+
+
     var columns = [
       {
         title: "ID",

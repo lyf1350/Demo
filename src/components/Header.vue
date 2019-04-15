@@ -32,21 +32,13 @@
       </div>
 
       <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
-        <li class="nav-item dropdown">
-          <a class="nav-item nav-link mr-md-2" href="#">下拉框</a>
-          <div class="dropdown-menu dropdown-menu-left" aria-labelledby="bd-versions">
-            <router-link class="dropdown-item" to="/">下拉框1</router-link>
-            <router-link class="dropdown-item" to="/">下拉框2</router-link>
-          </div>
-        </li>
-
         <li class="nav-item">
           <router-link class="nav-link" to="/login" v-if="$store.state.user==null">登录</router-link>
           <div v-else>
             <li class="nav-item dropdown">
               <router-link class="nav-item nav-link mr-md-2" to="/user">
                 {{$store.state.user.username}}
-                <b-badge variant="danger" v-if="$store.state.unreadMessageCount>0"> {{$store.state.unreadMessageCount}}</b-badge>
+                
               </router-link>
 
               <div class="dropdown-menu dropdown-menu-left" aria-labelledby="bd-versions">
@@ -55,15 +47,23 @@
                 <router-link class="dropdown-item" to="/workflow">流程</router-link>
                 <router-link class="dropdown-item" to="/template">模版</router-link>
 
-                <router-link class="dropdown-item" to="/admin" v-if="$store.state.user.members.some(x=>x.role.roleName='管理员')">管理</router-link>
-
+                <router-link
+                  class="dropdown-item"
+                  to="/admin"
+                  v-if="$store.state.user.members.some(x=>x.role.roleName='管理员')"
+                >管理</router-link>
                 <button class="dropdown-item" @click="logout">登出</button>
               </div>
             </li>
           </div>
         </li>
         <li class="nav-item">
-          <a class="nav-link p-2" href="#" rel="noopener" aria-label="GitHub">
+          <a
+            class="nav-link p-2"
+            href="https://github.com/lyf1350"
+            rel="noopener"
+            aria-label="GitHub"
+          >
             <svg
               class="navbar-nav-svg"
               xmlns="http://www.w3.org/2000/svg"
@@ -81,21 +81,29 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link p-2" href="#" rel="noopener" aria-label="Twitter">
-            <svg
-              class="navbar-nav-svg"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 416.32"
-              focusable="false"
-              role="img"
-            >
-              <title>Twitter</title>
-              <path
-                d="M160.83 416.32c193.2 0 298.92-160.22 298.92-298.92 0-4.51 0-9-.2-13.52A214 214 0 0 0 512 49.38a212.93 212.93 0 0 1-60.44 16.6 105.7 105.7 0 0 0 46.3-58.19 209 209 0 0 1-66.79 25.37 105.09 105.09 0 0 0-181.73 71.91 116.12 116.12 0 0 0 2.66 24c-87.28-4.3-164.73-46.3-216.56-109.82A105.48 105.48 0 0 0 68 159.6a106.27 106.27 0 0 1-47.53-13.11v1.43a105.28 105.28 0 0 0 84.21 103.06 105.67 105.67 0 0 1-47.33 1.84 105.06 105.06 0 0 0 98.14 72.94A210.72 210.72 0 0 1 25 370.84a202.17 202.17 0 0 1-25-1.43 298.85 298.85 0 0 0 160.83 46.92"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </a>
+          <b-dropdown no-caret variant="nav-link">
+            <template slot="button-content">
+              <i class="far fa-envelope" style="font-size:125%;padding-top:2px;color:#95a6af"></i>
+              <b-badge
+                variant="danger"
+                style="font-size:9px;line-height:.9;position:absolute;top:1px;right:3px;padding:2px 3px"
+                v-if="$store.state.unreadMessageCount>0"
+              >{{$store.state.unreadMessageCount}}</b-badge>
+            </template>
+            <b-dropdown-text style="padding:0 0">
+              <b-list-group
+                style="height:300px;width:300px;overflow:auto"
+                v-if="$store.state.unreadMessageCount>0"
+              >
+                <b-list-group-item
+                  v-for="(message) in $store.state.msg.filter(e=>e.state=='0')"
+                  :key="message.id"
+                  class="card" 
+                ><h5>{{message.message.title}}</h5> 发件人:{{message.message.source}}</b-list-group-item>
+              </b-list-group>
+              <b-btn to="/message" block>查看所有消息</b-btn>
+            </b-dropdown-text>
+          </b-dropdown>
         </li>
         <li class="nav-item">
           <a class="nav-link p-2" href="#" rel="noopener" aria-label="Open Collective">
@@ -147,8 +155,8 @@ export default {
     logout() {
       var $this = this;
       axios.get("/api/user/logout").then(function() {
-        $this.$store.commit("setValue", {name:'user',value:null});
-        $this.$store.commit("setValue",{name:'ws',value:null});
+        $this.$store.commit("setValue", { name: "user", value: null });
+        $this.$store.commit("setValue", { name: "ws", value: null });
         sessionStorage.clear();
 
         $this.$router.push("/");
@@ -177,83 +185,85 @@ export default {
 </script>
 <style scoped>
 .bd-navbar {
-    min-height: 4rem;
-    background-color: #314b5e;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05), inset 0 -1px 0 rgba(0, 0, 0, .1)
+  min-height: 4rem;
+  background-color: #314b5e;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 .bd-navbar {
-    min-height: 4rem;
-    background-color: #314b5e;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05), inset 0 -1px 0 rgba(0, 0, 0, .1)
+  min-height: 4rem;
+  background-color: #314b5e;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width:991.98px) {
+@media (max-width: 991.98px) {
+  .bd-navbar {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .bd-navbar .navbar-nav-scroll {
+    max-width: 100%;
+    height: 2.5rem;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    font-size: 0.875rem;
+  }
+
+  .bd-navbar .navbar-nav-scroll .navbar-nav {
+    padding-bottom: 2rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 768px) {
+  @supports ((position: -webkit-sticky) or (position: sticky)) {
     .bd-navbar {
-        padding-right: .5rem;
-        padding-left: .5rem
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      z-index: 1071;
     }
-
-    .bd-navbar .navbar-nav-scroll {
-        max-width: 100%;
-        height: 2.5rem;
-        margin-top: .25rem;
-        overflow: hidden;
-        font-size: .875rem
-    }
-
-    .bd-navbar .navbar-nav-scroll .navbar-nav {
-        padding-bottom: 2rem;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch
-    }
-}
-
-@media (min-width:768px) {
-    @supports ((position: -webkit-sticky) or (position:sticky)) {
-        .bd-navbar {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            z-index: 1071
-        }
-    }
+  }
 }
 
 .bd-navbar .navbar-nav .nav-link {
-    padding-right: .5rem;
-    padding-left: .5rem;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
 }
 
 .bd-navbar .navbar-nav .nav-link.active,
 .bd-navbar .navbar-nav .nav-link:hover {
-    color: #fff;
-    background-color: transparent
+  color: #fff;
+  background-color: transparent;
 }
 
 .bd-navbar .navbar-nav .nav-link.active {
-    font-weight: 600
+  font-weight: 600;
 }
 
 .bd-navbar .navbar-nav-svg {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    vertical-align: text-top
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-top;
 }
 
 .bd-navbar .dropdown-menu {
-    font-size: .875rem
+  font-size: 0.875rem;
 }
 
 .bd-navbar .dropdown-item.active {
-    font-weight: 600;
-    color: #212529;
-    background-color: transparent;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23292b2c' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: .4rem .6rem;
-    background-size: .75rem .75rem
+  font-weight: 600;
+  color: #212529;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23292b2c' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: 0.4rem 0.6rem;
+  background-size: 0.75rem 0.75rem;
 }
 .dropdown:hover .dropdown-menu {
   display: block;
