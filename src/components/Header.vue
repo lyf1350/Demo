@@ -164,22 +164,22 @@ export default {
     }
   },
   mounted() {
-    window.addEventListener("scroll", () => {
-      var $this = this;
-      this.didScroll ||
-        ((this.didScroll = !0),
-        setTimeout(function() {
-          var e = window.pageYOffset || document.documentElement.scrollTop;
-          if (e < $this.currentScoll) {
-            $this.fadeout = false;
-            $this.fadein = true;
-          } else {
-            $this.fadeout = true;
-            $this.fadein = false;
-          }
-          ($this.currentScoll = e), ($this.didScroll = !1);
-        }, 200));
-    });
+    // window.addEventListener("scroll", () => {
+    //   var $this = this;
+    //   this.didScroll ||
+    //     ((this.didScroll = !0),
+    //     setTimeout(function() {
+    //       var e = window.pageYOffset || document.documentElement.scrollTop;
+    //       if (e < $this.currentScoll) {
+    //         $this.fadeout = false;
+    //         $this.fadein = true;
+    //       } else {
+    //         $this.fadeout = true;
+    //         $this.fadein = false;
+    //       }
+    //       ($this.currentScoll = e), ($this.didScroll = !1);
+    //     }, 200));
+    // });
   }
 };
 </script>

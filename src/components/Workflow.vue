@@ -2,9 +2,8 @@
   <div v-if="workflow!=null">
     <b-tabs card>
       <b-tab title="流程信息">
-        流程名称:{{workflow.workflowTemplate.templateName}}
+        流程名称:{{workflow.workflowName}}
         流程ID:{{workflow.id}}
-
         <br>
       </b-tab>
       <b-tab @click="show" title="流程图">
@@ -12,7 +11,7 @@
       </b-tab>
       <b-tab title="流程日志">
         <div>
-          <b-table :items="logs" responsive ></b-table>
+          <b-table :items="logs" responsive></b-table>
         </div>
       </b-tab>
     </b-tabs>
@@ -43,7 +42,9 @@ export default {
       selectedNode: null,
       logs: [],
       remark: "",
-      currentPage:1
+      currentPage: 1,
+      data: {},
+      layout: {}
     };
   },
   props: {
@@ -53,17 +54,17 @@ export default {
     console.log("mounted");
   },
   methods: {
-   show() {
+    show() {
       service.initTemplate(
         this,
         "nodeDiv",
-        this.workflow.workflowTemplate.templateModel,"#nodeProp"
+        this.workflow.workflowModel,
+        "#nodeProp"
       );
     }
   },
   watch: {
     workflow: function(newVal) {
-      
       console.log("logs:" + this.logs);
       var _this = this;
       axios
@@ -74,17 +75,17 @@ export default {
           })
         )
         .then(function(response) {
-            console.log("data:"+JSON.stringify(response.data.data));
+          console.log("data:" + JSON.stringify(response.data.data));
           if (response.data.success) {
             var logs = [];
             for (let i of response.data.data) {
               logs.push({
-                node: i.node == null ? "" : i.node.nodeTemplate.templateName,
+                node: i.nodeName,
                 decision: i.decision,
                 startTime: _this.dateFormatter(i.startTime),
                 endTime: _this.dateFormatter(i.endTime),
                 remark: i.remark,
-                person: i.person==null?'':i.person.username
+                person: i.userName
               });
             }
             console.log("111");
@@ -92,6 +93,12 @@ export default {
           }
           console.log("response:" + JSON.stringify(response));
         });
+      this.layout = JSON.parse(newVal.workflowLayout);
+      this.data = JSON.parse(newVal.property.property);
+      for (let i of this.layout) {
+        i.editable = false;
+      }
+      if (this.data == null) this.data = {};
       console.log("newVal");
     }
   },

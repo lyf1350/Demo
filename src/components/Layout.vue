@@ -1,35 +1,38 @@
 <template>
   <b-container>
-    <b-row v-for="(row,index) in layout" :key="'row'+index">
+    <b-row v-for="(row,index) in layout2" :key="'row'+index">
       <b-col v-for="(col,index2) in row" :key="'col'+index2">
         <div v-if="col.type=='file'">
-          <label>{{col.label}}</label>
-          <ul>
-            <li v-for="file in temp[col.key]" :key="file.name">
-              {{file.name}} 进度:
-              <b-progress :value="parseInt(file.progress)" variant="success"></b-progress>
-            </li>
-          </ul>
-          <file-upload
-            :ref="'upload'+col.key"
-            v-model="temp[col.key]"
-            post-action="/api/file/upload"
-            @input-file="inputFile"
-            class="btn btn-primary"
-            :multiple="col.multiple"
-          >
-            <i class="fa fa-plus"></i>
-            选择文件
-          </file-upload>
-          <b-btn
-            v-show="!$refs['upload'+col.key] || !$refs['upload'+col.key].active"
-            @click.prevent="upload(col.key)"
-          >上传</b-btn>
-          <b-btn
-            v-show="$refs['upload'+col.key] && $refs['upload'+col.key].active"
-            @click.prevent="$refs['upload'+col.key][0].active = false"
-            variant="danger"
-          >停止上传</b-btn>
+          <label v-if="col.showLabel">{{col.label}}</label>
+
+          <div v-if="col.editable">
+            <ul>
+              <li v-for="(file,index) in temp[col.key]" :key="file.name">
+                {{file.name}} <b-btn size="sm" @click="removeFile(temp[col.key],index)"><i class="fas fa-times" ></i></b-btn>进度:
+                <b-progress :value="parseInt(file.progress)" variant="success"></b-progress>
+              </li>
+            </ul>
+            <file-upload
+              :ref="'upload'+col.key"
+              v-model="temp[col.key]"
+              post-action="/api/file/upload"
+              @input-file="inputFile"
+              class="btn btn-primary"
+              :multiple="col.multiple"
+            >
+              <i class="fa fa-plus"></i>
+              选择文件
+            </file-upload>
+            <b-btn
+              v-show="!$refs['upload'+col.key] || !$refs['upload'+col.key].active"
+              @click.prevent="upload(col.key)"
+            >上传</b-btn>
+            <b-btn
+              v-show="$refs['upload'+col.key] && $refs['upload'+col.key].active"
+              @click.prevent="$refs['upload'+col.key][0].active = false"
+              variant="danger"
+            >停止上传</b-btn>
+          </div>
           <ul>
             <li v-for="file in data[col.key]" :key="file.id">
               {{file.fileName}}
@@ -41,7 +44,7 @@
         </div>
         <basic v-else-if="col.type!='table'" :config="col" v-model="data[col.key]"/>
         <div v-else>
-          {{col.label}}
+          <label v-if="col.showLabel">{{col.label}}</label>
           <b-table
             :items="data[col.key]"
             :fields="col.fields"
@@ -68,6 +71,8 @@
 </template>
 <script>
 import Basic from "@/components/BasicComponent.vue";
+import _ from "lodash";
+
 export default {
   props: {
     layout: null,
@@ -76,17 +81,41 @@ export default {
   data() {
     return {
       data: this.value,
-      temp: {}
+      temp: {},layout2:null
     };
   },
   mounted() {
     console.log(this.data);
+    console.log(this.layout);
+
+    this.updateLayout(this.layout);
   },
   methods: {
+    updateLayout(layout) {
+      var temp = {};
+      var temp2 = [];
+      for (var i of layout) {
+        layout.editable = true;
+        if (temp[i.row] == undefined || temp[i.row] == null) {
+          temp[i.row] = [];
+        }
+        temp[i.row].push(i);
+      }
+      for (var i in temp) {
+        temp[i].sort((a, b) => {
+          return a.col < b.col ? -1 : 1;
+        });
+        temp2.push(temp[i]);
+      }
+      temp2.sort((a, b) => {
+        return a[0].row < b[0].row ? -1 : 1;
+      });
+      this.layout2 = temp2;
+    },
     addRow(key) {
       this.temp[key] = {};
-      if(this.data[key]==undefined||this.data[key]==null)
-        this.$set(this.data,key,[]);
+      if (this.data[key] == undefined || this.data[key] == null)
+        this.$set(this.data, key, []);
       this.data[key].push({});
     },
     removeRow(key) {
@@ -126,15 +155,23 @@ export default {
         // Get response data
         console.log("response", newFile.response);
         if (newFile.response.success && newFile.key) {
-          if (this.data[newFile.key] == null)
-            this.data[newFile.key] = [];
+          if (this.data[newFile.key] == null) this.data[newFile.key] = [];
           this.data[newFile.key].push(newFile.response.data);
         }
       }
+    },
+    removeFile(data,index){
+      data.splice(index,1);
     }
   },
   components: {
     basic: Basic
+  },
+  watch: {
+    layout: function(newVal, oldVal) {
+      this.updateLayout(newVal);
+      this.data = {};
+    }
   }
 };
 </script>

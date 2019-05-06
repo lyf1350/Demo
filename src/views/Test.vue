@@ -1,7 +1,12 @@
 <template>
   <div>
-    <!-- {{$store.state.pending}} -->
-    <button data-toggle="modal" data-target="#modal" class="btn btn-primary" @click="test1">modal</button>
+    {{$store.state.pending}}
+    <button
+      data-toggle="modal"
+      data-target="#modal"
+      class="btn btn-primary"
+      @click="test1"
+    >modal</button>
     <button @click="test2" class="btn btn-primary">写入2</button>
     <button @click="test1" class="btn btn-primary">写入1</button>
     <br>
@@ -22,7 +27,7 @@
 
     <b-modal id="modal" hide-footer hide-header>1234</b-modal>
     <div id="editor_holder"></div>
-    <!-- <layout :layout="testLayout" :value="testData"/> -->
+    <layout :layout="layout" :value="testData"/>
   </div>
 </template>
 
@@ -39,6 +44,7 @@ import test from "@/components/TestComponent";
 import layout from "@/components/Layout";
 import _ from "lodash";
 import JSONEditor from "@json-editor/json-editor";
+import * as d3 from "d3";
 export default {
   data() {
     return {
@@ -88,87 +94,10 @@ export default {
         }
       ],
       testLayout: null,
-      layout: [
-        {
-          key: "f",
-          label: "test2",
-          row: 1,
-          col: 2,
-          type: "file",
-          selectable: true,
-          options: ["a", "b", "c"],
-          editable: true,
-          showLabel: true,
-          multiple: true
-        },
-        {
-          key: "a",
-          label: "test1",
-          row: 5,
-          col: 2,
-          type: "string",
-          selectable: true,
-          options: ["a", "b", "c"],
-          editable: true,
-          showLabel: true
-        },
-        {
-          key: "b",
-          label: "test2",
-          row: 3,
-          col: 2,
-          type: "number",
-          editable: true,
-          showLabel: true,
-          fields: [
-            {
-              key: "",
-              label: "",
-              type: ""
-            }
-          ]
-        },
-        {
-          key: "c",
-          label: "test2",
-          row: 3,
-          col: 1,
-          type: "date",
-          editable: true,
-          fields: [
-            {
-              key: "",
-              label: "",
-              type: ""
-            }
-          ],
-          showLabel: true
-        },
-        {
-          key: "e",
-          label: "test5",
-          type: "table",
-          row: 4,
-          col: 3,
-          editable: true,
-          fields: [
-            {
-              key: "test1",
-              label: "测试1",
-              type: "string",
-              editable: true,
-              selectable: true,
-              options: ["a", "b", "c", "d"]
-            },
-            {
-              key: "test2",
-              label: "测试2",
-              type: "string",
-              selectable: false
-            }
-          ]
-        }
-      ]
+      layout: [],
+      nodes: [],
+      svgContainer: null,
+      circle: null
     };
   },
   components: {
@@ -177,92 +106,38 @@ export default {
     layout: layout
   },
   created() {},
-  mounted() {
-    var element = document.getElementById("editor_holder");
-
-    var editor = new JSONEditor(element, {
-      theme: "bootstrap4",
-      schema: {
-        type: "object",
-        title: "流程信息页面布局设置",
-        properties: {
-          make: {
-            type: "string",
-            enum: ["Toyota", "BMW", "Honda", "Ford", "Chevy", "VW"]
-          },
-          model: {
-            type: "string"
-          },
-          year: {
-            type: "integer",
-            title:"年份",
-            enum: [
-              1995,
-              1996,
-              1997,
-              1998,
-              1999,
-              2000,
-              2001,
-              2002,
-              2003,
-              2004,
-              2005,
-              2006,
-              2007,
-              2008,
-              2009,
-              2010,
-              2011,
-              2012,
-              2013,
-              2014
-            ],
-            default: 2008
-          },
-          safety: {
-            type: "integer",
-            format: "rating",
-            maximum: "5",
-            exclusiveMaximum: false,
-            readonly: false
-          }
-        }
-      },
-      iconlib:'fontawesome5',
-      compact:true,
-      object_layout:'normal'
-    });
-    var $this = this;
-    axios.get("/api/file/list").then(response => {
-      if (response.data.success) {
-        $this.uploadedFiles = response.data.data;
-      }
-    });
-    var test = {};
-    var test2 = [];
-    for (var i of this.layout) {
-      if (test[i.row] == undefined || test[i.row] == null) {
-        test[i.row] = [];
-      }
-      test[i.row].push(i);
-    }
-    for (var i in test) {
-      test[i].sort((a, b) => {
-        return a.col < b.col ? -1 : 1;
-      });
-      test2.push(test[i]);
-    }
-    test2.sort((a, b) => {
-      return a[0].row < b[0].row ? -1 : 1;
-    });
-    this.testLayout = test2;
-    console.log("test:" + JSON.stringify(test2));
-
-    console.log("mounted");
-    // init();
-  },
+  mounted() {},
   methods: {
+    test5(index) {
+      console.log("circle:", this.circle);
+      var jsonCircles = [
+        { x_axis: 30, y_axis: 30, radius: 20, color: "blue" },
+        { x_axis: 70, y_axis: 70, radius: 20, color: "purple" },
+        { x_axis: 110, y_axis: 100, radius: 20, color: "red" }
+      ];
+      jsonCircles[index].color = "yellow";
+      console.log("json:", jsonCircles);
+      this.svgContainer
+        .selectAll("circle")
+        .exit()
+        .remove();
+      this.svgContainer
+        .selectAll("circle")
+        .data(jsonCircles)
+        .attr("cx", function(d) {
+          return d.x_axis;
+        })
+        .attr("cy", function(d) {
+          return d.y_axis;
+        })
+        .attr("r", function(d) {
+          return d.radius;
+        })
+        .style("fill", function(d) {
+          console.log("d:", d);
+          return d.color;
+        });
+    },
     /**
      * Has changed
      * @param  Object|undefined   newFile   Read only
@@ -316,23 +191,24 @@ export default {
       this.$refs["upload" + key][0].active = true;
     },
     test1() {
-      var _this = this;
-      this.fields = [
-        {
-          key: "file_name",
-          label: "文件名"
-        },
-        {
-          key: "suffix",
-          label: "后缀",
-          sortable: true,
-          variant: "danger"
-        }
-      ];
-      axios.get("/api/test").then(response => {
-        console.log("response:" + JSON.stringify(response.data));
-        _this.data = response.data.data;
-      });
+      this.$set(this, "nodes", ["4", "5", "6"]);
+      // var _this = this;
+      // this.fields = [
+      //   {
+      //     key: "file_name",
+      //     label: "文件名"
+      //   },
+      //   {
+      //     key: "suffix",
+      //     label: "后缀",
+      //     sortable: true,
+      //     variant: "danger"
+      //   }
+      // ];
+      // axios.get("/api/test").then(response => {
+      //   console.log("response:" + JSON.stringify(response.data));
+      //   _this.data = response.data.data;
+      // });
       // this.src = "/api/file/" + uuid;
     },
     dragover(ev) {
@@ -370,9 +246,15 @@ export default {
       this.selected = true;
       this.index = index;
     },
-    test2(ev) {
+    test2() {
       // console.log(ev);
-      console.log(this.$refs["test"]);
+      console.log(this.layout);
+      // this.layout=this.editor.getValue();
+
+      // this.testData={};
+      this.$set(this, "layout", this.editor.getValue());
+      console.log(this.layout);
+
       // console.log(this.temp);
       // pdf.getDocument("/api/test/1").then(
       //   pdf => {

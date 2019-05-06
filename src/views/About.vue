@@ -1,7 +1,7 @@
 <template>
   <div class="about">
     <h1>工作进度</h1>
-    <table id="table"  data-id-field="id" data-click-to-select="true" data-search="true"></table>
+    <table id="table" data-id-field="id" data-click-to-select="true" data-search="true"></table>
   </div>
 </template>
 <script>
@@ -14,7 +14,7 @@ require("bootstrap-table/dist/bootstrap-table.css");
 export default {
   methods: {
     test() {
-      alert('test');
+      alert("test");
       console.log("tableData" + $("#table").bootstrapTable("getData"));
     }
   },
@@ -47,8 +47,11 @@ export default {
     contentData.push({ id: 6, content: "审核流程", contentState: "success" });
     contentData.push({ id: 7, content: "文件预览", contentState: "success" });
     contentData.push({ id: 8, content: "图表配置", contentState: "warning" });
-    contentData.push({ id: 9, content: "流程信息显示", contentState: "secondary" });
-
+    contentData.push({
+      id: 9,
+      content: "流程信息显示",
+      contentState: "success"
+    });
 
     var columns = [
       {
@@ -75,7 +78,7 @@ export default {
               return "<button class='btn btn-warning'>已开始</button>";
             case "danger":
               return "<button class='btn btn-danger'>已取消</button>";
-              case "secondary":
+            case "secondary":
               return "<button class='btn btn-secondary'>未开始</button>";
             default:
               return "<button class='btn btn-info'>未知状态</button>";

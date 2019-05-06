@@ -2,17 +2,22 @@
   <div v-if="node!=null">
     <b-tabs card>
       <b-tab title="流程信息">
-        流程名称:{{node.workflow.workflowTemplate.templateName}}
+        流程名称:{{node.workflow.workflowName}}
         <br>
         流程ID:{{node.workflow.id}}
         <br>
-        节点名称:{{node.nodeTemplate.templateName}}
+        节点名称:{{node.nodeName}}
+        <b-card title="流程属性">
+          <layout :layout="layout" :value="data"/>
+        </b-card>
         <br>
         <label>意见:</label>
         <b-form-input type="text" v-model="remark"/>
         <br>
+        <b-button class="btn-block" variant="info" @click="save">保存</b-button>
+
         <b-button class="btn-block" variant="success" @click="execute('approve')">同意</b-button>
-        <b-button class="btn-block"  variant="danger" @click="execute('refuse')">拒绝</b-button>
+        <b-button class="btn-block" variant="danger" @click="execute('refuse')">拒绝</b-button>
       </b-tab>
       <b-tab @click="show" title="流程图">
         <div id="nodeDiv" style="flex-grow: 1; height: 750px; border: solid 1px black"></div>
@@ -43,6 +48,7 @@ import service from "@/assets/js/service";
 import axios from "axios";
 import qs from "qs";
 import moment from "moment";
+import layout from "@/components/Layout";
 export default {
   data() {
     return {
@@ -50,7 +56,9 @@ export default {
       test: "123",
       selectedNode: null,
       logs: [],
-      remark: ""
+      remark: "",
+      layout: null,
+      data: {}
     };
   },
   props: {
@@ -61,13 +69,14 @@ export default {
   },
   methods: {
     show() {
+      console.log("workflow:", this.node.workflow.workflowModel);
       service.initTemplate(
         this,
         "nodeDiv",
-        this.node.workflow.workflowTemplate.templateModel,"#nodeProp"
+        this.node.workflow.workflowModel,
+        "#nodeProp"
       );
     },
-    
     execute(decision) {
       axios.post(
         "/api/node/execute",
@@ -77,17 +86,26 @@ export default {
           decision: decision == "approve" ? "同意" : "拒绝"
         })
       );
-    },filterFunction(value){
-      console.log("value:"+JSON.stringify(value));
+    },
+    filterFunction(value) {
+      console.log("value:" + JSON.stringify(value));
       return true;
+    },
+    save() {
+      axios
+        .post(
+          "/api/workflow/save",
+          qs.stringify({
+            id: this.node.workflow.id,
+            property: JSON.stringify(this.data)
+          })
+        )
+        .then(response => console.log(response));
     }
   },
   watch: {
     node: function(newVal) {
-      if (newVal) {
-        console.log("template:" + JSON.stringify(newVal.workflow));
-      }
-      console.log("logs:" + this.logs);
+      if (newVal == null) return;
       var _this = this;
       axios
         .post(
@@ -101,20 +119,25 @@ export default {
             var logs = [];
             for (let i of response.data.data) {
               logs.push({
-                node: i.node == null ? "" : i.node.nodeTemplate.templateName,
+                node: i.nodeName,
                 decision: i.decision,
                 startTime: _this.dateFormatter(i.startTime),
                 endTime: _this.dateFormatter(i.endTime),
                 remark: i.remark,
-                person: i.person.username
+                person: i.userName
               });
             }
-            console.log("111");
             _this.logs = logs;
           }
-          console.log("response:" + JSON.stringify(response));
+          console.log("response:", response);
         });
-      console.log("newVal");
+      this.layout = JSON.parse(newVal.workflow.workflowLayout);
+      this.data = JSON.parse(newVal.workflow.property.property);
+      let name = this.node.nodeName;
+      for (let i of this.layout) {
+        if (i.nodes.indexOf(name) == -1) i.editable = false;
+      }
+      if (this.data == null) this.data = {};
     }
   },
   filters: {
@@ -126,6 +149,9 @@ export default {
       }
       return str;
     }
+  },
+  components: {
+    layout: layout
   }
 };
 </script>

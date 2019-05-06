@@ -61,7 +61,6 @@ export default {
                     store.commit('setValue',{name:'pending',value:data.pending});
                     store.commit('setValue',{name:'finished',value:data.finished});
                     store.commit('setValue',{name:'executed',value:data.executed});
-
                 }
             });
     },
@@ -134,23 +133,20 @@ export default {
                 "Table", {
                     selectionChanged: node => {
                         var icon = node.findObject("Icon");
+                        console.log();
                         if (node.isSelected) {
                             icon.fill = "#f53463";
                         } else {
-                            icon.fill = "#00A9C9";
+                            icon.fill = node.data.color?node.data.color:"#00A9C9";
                         }
                     },
                     doubleClick: (e, node) => {
                         _this.selectedNode = node;
                         if (node.data.id != node.key) {
-                            console.log("1111");
                             node.data.id = node.key;
-                            node.data.prop = {
-                                reviewers: []
-                            };
+                            _this.$set(node.data,"prop",{reviewers: []});
                         }
                         $(propId).modal("show");
-                        console.log("double clicked");
                     }
                 },
                 nodeStyle(),
@@ -162,7 +158,7 @@ export default {
                         name: "Icon",
                         fill: "#00A9C9",
                         strokeWidth: 0
-                    }),
+                    },new go.Binding("fill", "color")),
                     _(
                         go.TextBlock,
                         "common",
