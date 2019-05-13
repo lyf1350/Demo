@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{$store.state.pending}}
+    asdklfjasdjflasjd
     <button
       data-toggle="modal"
       data-target="#modal"
@@ -15,19 +15,14 @@
       <b-dropdown-item>aaa</b-dropdown-item>
     </b-dropdown>
     <b-btn v-b-modal.modal>test modal</b-btn>
-    {{to}}
     <b-form-input v-model="text" placeholder="Enter your name" readonly draggable></b-form-input>
-    {{message}}
-    {{testData}}
-    <div @drop="test2" @dragover.prevent>
-      <p>asdasd</p>
-      <span>fffff</span>
-    </div>
     <b-table :items="data" :fields="fields" hover responsive fixed/>
 
     <b-modal id="modal" hide-footer hide-header>1234</b-modal>
     <div id="editor_holder"></div>
     <layout :layout="layout" :value="testData"/>
+    {{testData1}}
+    <div v-for="(aac,index) in test3()" :key="index">{{aac}}</div>
   </div>
 </template>
 
@@ -80,13 +75,7 @@ export default {
       data: [],
       fields: [],
       html: "<Test />aabbcc",
-      config: {
-        editable: true,
-        label: "test",
-        type: "string",
-        selectable: true,
-        options: ["a", "b", "c", "d"]
-      },
+      config: {},
       dataArray: [
         {
           test1: "111",
@@ -97,7 +86,9 @@ export default {
       layout: [],
       nodes: [],
       svgContainer: null,
-      circle: null
+      circle: null,
+      testData1: [],
+      testData2: 10
     };
   },
   components: {
@@ -106,7 +97,9 @@ export default {
     layout: layout
   },
   created() {},
-  mounted() {},
+  mounted() {
+    for (let i = 0; i < 10; i++) this.testData1.push(i);
+  },
   methods: {
     test5(index) {
       console.log("circle:", this.circle);
@@ -191,7 +184,7 @@ export default {
       this.$refs["upload" + key][0].active = true;
     },
     test1() {
-      this.$set(this, "nodes", ["4", "5", "6"]);
+      this.testData2 = Math.random() * 10;
       // var _this = this;
       // this.fields = [
       //   {
@@ -247,13 +240,7 @@ export default {
       this.index = index;
     },
     test2() {
-      // console.log(ev);
-      console.log(this.layout);
-      // this.layout=this.editor.getValue();
-
-      // this.testData={};
-      this.$set(this, "layout", this.editor.getValue());
-      console.log(this.layout);
+      $.alert("test");
 
       // console.log(this.temp);
       // pdf.getDocument("/api/test/1").then(
@@ -288,6 +275,9 @@ export default {
       //   type: this.type
       // };
       // this.$store.state.ws.send(JSON.stringify(temp));
+    },
+    test3() {
+      return this.testData1.filter(e => e < this.testData2);
     }
   }
 };

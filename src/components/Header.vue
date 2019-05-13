@@ -36,16 +36,17 @@
           <router-link class="nav-link" to="/login" v-if="$store.state.user==null">登录</router-link>
           <div v-else>
             <li class="nav-item dropdown">
-              <router-link class="nav-item nav-link mr-md-2" to="/user">
-                {{$store.state.user.username}}
-                
-              </router-link>
+              <router-link
+                class="nav-item nav-link mr-md-2"
+                to="/user"
+              >{{$store.state.user.username}}</router-link>
 
               <div class="dropdown-menu dropdown-menu-left" aria-labelledby="bd-versions">
                 <!-- <router-link class="dropdown-item" to="/user">用户信息</router-link> -->
                 <router-link class="dropdown-item" to="/message">消息</router-link>
                 <router-link class="dropdown-item" to="/workflow">流程</router-link>
                 <router-link class="dropdown-item" to="/template">模版</router-link>
+                <router-link class="dropdown-item" to="/config">配置</router-link>
 
                 <router-link
                   class="dropdown-item"
@@ -98,8 +99,11 @@
                 <b-list-group-item
                   v-for="(message) in $store.state.msg.filter(e=>e.state=='0')"
                   :key="message.id"
-                  class="card" 
-                ><h5>{{message.message.title}}</h5> 发件人:{{message.message.source}}</b-list-group-item>
+                  class="card"
+                >
+                  <h5>{{message.message.title}}</h5>
+                  发件人:{{message.message.source}}
+                </b-list-group-item>
               </b-list-group>
               <b-btn to="/message" block>查看所有消息</b-btn>
             </b-dropdown-text>

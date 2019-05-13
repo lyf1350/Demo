@@ -15,6 +15,8 @@ require("animate.css");
 require("jquery.nicescroll");
 require("select2");
 require("select2/dist/css/select2.css");
+require("jquery-confirm");
+require("jquery-confirm/css/jquery-confirm.css");
 import Header from "@/components/Header.vue";
 import axios from "axios";
 
@@ -75,12 +77,15 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  width: 100%;
+
   height: 100%;
   /* overflow: hidden; */
 }
 
 html,
 body {
+  width: 100%;
   height: 100%;
 }
 .my-box {

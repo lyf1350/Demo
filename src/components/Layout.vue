@@ -8,13 +8,15 @@
           <div v-if="col.editable">
             <ul>
               <li v-for="(file,index) in temp[col.key]" :key="file.name">
-                {{file.name}} <b-btn size="sm" @click="removeFile(temp[col.key],index)"><i class="fas fa-times" ></i></b-btn>进度:
+                {{file.name}}
+                <b-btn size="sm" @click="removeFile(temp[col.key],index)">
+                  <i class="fas fa-times"></i>
+                </b-btn>进度:
                 <b-progress :value="parseInt(file.progress)" variant="success"></b-progress>
               </li>
             </ul>
             <file-upload
               :ref="'upload'+col.key"
-              v-model="temp[col.key]"
               post-action="/api/file/upload"
               @input-file="inputFile"
               class="btn btn-primary"
@@ -34,11 +36,14 @@
             >停止上传</b-btn>
           </div>
           <ul>
-            <li v-for="file in data[col.key]" :key="file.id">
+            <li v-for="(file,fileIndex) in data[col.key]" :key="file.id">
               {{file.fileName}}
-              <!-- <b-button v-b-modal.modal variant="success" @click="preview(file.uuid)">预览</b-button>
-                <b-button @click="download(file.uuid)" variant="primary">下载</b-button>
-              <b-button @click="deleteFile(file)" variant="danger">删除</b-button>-->
+              <b-button @click="download(file.uuid)" variant="primary">下载</b-button>
+              <b-button
+                @click="deleteFile(data[col.key],fileIndex)"
+                variant="danger"
+                v-if="col.editable"
+              >删除</b-button>
             </li>
           </ul>
         </div>
@@ -52,6 +57,7 @@
             :selectable="col.editable"
             @row-selected="rowSelected(col.key)"
             @row-clicked="rowClicked"
+            :id="'table'+col.key"
           >
             <template v-for="(field,index3) in col.fields" :slot="field.key" slot-scope="slotData">
               <basic
@@ -72,7 +78,8 @@
 <script>
 import Basic from "@/components/BasicComponent.vue";
 import _ from "lodash";
-
+import axios from "axios";
+import qs from "qs";
 export default {
   props: {
     layout: null,
@@ -81,14 +88,14 @@ export default {
   data() {
     return {
       data: this.value,
-      temp: {},layout2:null
+      temp: {},
+      layout2: null
     };
   },
   mounted() {
     console.log(this.data);
     console.log(this.layout);
-
-    this.updateLayout(this.layout);
+    if (this.layout) this.updateLayout(this.layout);
   },
   methods: {
     updateLayout(layout) {
@@ -114,9 +121,15 @@ export default {
     },
     addRow(key) {
       this.temp[key] = {};
-      if (this.data[key] == undefined || this.data[key] == null)
-        this.$set(this.data, key, []);
+      console.log("key11:", key);
+      console.log("ref:", this.$refs["table" + key]);
+      if (this.data[key] == null) this.data[key] = [];
+      var data = this.data[key] == null ? [] : this.data[key];
       this.data[key].push({});
+      this.$set(this, "data", this.data);
+
+      this.$root.$emit("bv::refresh::table", "table" + key);
+      console.log("data2:", this.data);
     },
     removeRow(key) {
       console.log(this.temp[key]);
@@ -126,7 +139,7 @@ export default {
       }
       _.pullAt(this.data[key], arr);
       this.temp[key] = {};
-      this.data[key].sort();
+      this.$root.$emit("bv::refresh::table", "table" + key);
     },
     rowSelected(key) {
       if (!this.selected) {
@@ -153,15 +166,38 @@ export default {
     inputFile: function(newFile, oldFile) {
       if (newFile && oldFile && !newFile.active && oldFile.active) {
         // Get response data
-        console.log("response", newFile.response);
+        console.log("response1:", newFile);
         if (newFile.response.success && newFile.key) {
           if (this.data[newFile.key] == null) this.data[newFile.key] = [];
           this.data[newFile.key].push(newFile.response.data);
+          console.log("data:", this.data);
         }
       }
     },
-    removeFile(data,index){
-      data.splice(index,1);
+    removeFile(data, index) {
+      data.splice(index, 1);
+    },
+    download(uuid) {
+      window.open("/api/file/download/" + uuid);
+    },
+    preview(uuid) {
+      this.src = "/api/file/" + uuid;
+    },
+    deleteFile(data, index) {
+      axios
+        .post(
+          "/api/file/delete",
+          qs.stringify({
+            file: JSON.stringify(data[index])
+          })
+        )
+        .then(response => {
+          console.log("response1", response, "test");
+          if (response.data.success) {
+            data.splice(index, 1);
+          }
+        });
+      console;
     }
   },
   components: {
@@ -170,8 +206,12 @@ export default {
   watch: {
     layout: function(newVal, oldVal) {
       this.updateLayout(newVal);
-      this.data = {};
+    },
+    value: function(newVal, oldVal) {
+      console.log("newVal:", newVal);
+      this.data = newVal;
     }
-  }
+  },
+  updated() {}
 };
 </script>

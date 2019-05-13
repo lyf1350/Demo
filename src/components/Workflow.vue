@@ -67,32 +67,25 @@ export default {
     workflow: function(newVal) {
       console.log("logs:" + this.logs);
       var _this = this;
-      axios
-        .post(
-          "/api/workflow/log",
-          qs.stringify({
-            workflow: JSON.stringify(newVal)
-          })
-        )
-        .then(function(response) {
-          console.log("data:" + JSON.stringify(response.data.data));
-          if (response.data.success) {
-            var logs = [];
-            for (let i of response.data.data) {
-              logs.push({
-                node: i.nodeName,
-                decision: i.decision,
-                startTime: _this.dateFormatter(i.startTime),
-                endTime: _this.dateFormatter(i.endTime),
-                remark: i.remark,
-                person: i.userName
-              });
-            }
-            console.log("111");
-            _this.logs = logs;
+      axios.get("/api/workflow/log?id=" + newVal.id).then(function(response) {
+        console.log("data:" + JSON.stringify(response.data.data));
+        if (response.data.success) {
+          var logs = [];
+          for (let i of response.data.data) {
+            logs.push({
+              node: i.nodeName,
+              decision: i.decision,
+              startTime: _this.dateFormatter(i.startTime),
+              endTime: _this.dateFormatter(i.endTime),
+              remark: i.remark,
+              person: i.userName
+            });
           }
-          console.log("response:" + JSON.stringify(response));
-        });
+          console.log("111");
+          _this.logs = logs;
+        }
+        console.log("response:" + JSON.stringify(response));
+      });
       this.layout = JSON.parse(newVal.workflowLayout);
       this.data = JSON.parse(newVal.property.property);
       for (let i of this.layout) {

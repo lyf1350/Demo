@@ -1,5 +1,5 @@
 <template>
-  <div v-if="node!=null">
+  <div v-if="node!=null&&show">
     <b-tabs card>
       <b-tab title="流程信息">
         流程名称:{{node.workflow.workflowName}}
@@ -17,9 +17,20 @@
         <b-button class="btn-block" variant="info" @click="save">保存</b-button>
 
         <b-button class="btn-block" variant="success" @click="execute('approve')">同意</b-button>
-        <b-button class="btn-block" variant="danger" @click="execute('refuse')">拒绝</b-button>
+        <b-button
+          class="btn-block"
+          variant="danger"
+          @click="execute('refuse')"
+          v-if="node.nodeLevel!=0"
+        >拒绝</b-button>
+        <b-button
+          class="btn-block"
+          variant="danger"
+          @click="deleteWorkflow"
+          v-if="node.nodeLevel==0&&node.workflow.workflowUser.id==$store.state.user.id"
+        >删除流程</b-button>
       </b-tab>
-      <b-tab @click="show" title="流程图">
+      <b-tab @click="showModel" title="流程图">
         <div id="nodeDiv" style="flex-grow: 1; height: 750px; border: solid 1px black"></div>
       </b-tab>
       <b-tab title="流程日志">
@@ -53,12 +64,12 @@ export default {
   data() {
     return {
       myDiagram: null,
-      test: "123",
       selectedNode: null,
       logs: [],
       remark: "",
       layout: null,
-      data: {}
+      data: {},
+      show: true
     };
   },
   props: {
@@ -68,7 +79,7 @@ export default {
     console.log("mounted");
   },
   methods: {
-    show() {
+    showModel() {
       console.log("workflow:", this.node.workflow.workflowModel);
       service.initTemplate(
         this,
@@ -78,20 +89,25 @@ export default {
       );
     },
     execute(decision) {
-      axios.post(
-        "/api/node/execute",
-        qs.stringify({
-          node: JSON.stringify(this.node),
-          remark: this.remark,
-          decision: decision == "approve" ? "同意" : "拒绝"
-        })
-      );
+      var _this = this;
+      axios
+        .post(
+          "/api/node/execute",
+          qs.stringify({
+            id: this.node.id,
+            remark: this.remark,
+            decision: decision == "approve" ? "同意" : "拒绝",
+            property: JSON.stringify(this.data)
+          })
+        )
+        .then(response => (_this.show = false));
     },
     filterFunction(value) {
       console.log("value:" + JSON.stringify(value));
       return true;
     },
     save() {
+      console.log(this.data);
       axios
         .post(
           "/api/workflow/save",
@@ -100,20 +116,39 @@ export default {
             property: JSON.stringify(this.data)
           })
         )
-        .then(response => console.log(response));
+        .then(response => console.log(response.data));
+    },
+    deleteWorkflow() {
+      var _this = this;
+      axios
+        .post(
+          "/api/workflow/delete",
+          qs.stringify({
+            id: _this.node.workflow.id
+          })
+        )
+        .then(response => {
+          console.log(response.data);
+          if (response.data.success) {
+            _this.show = false;
+            var nodes = _this.$store.state.pending.filter(
+              e => e.id != _this.node.id
+            );
+            _this.$store.commit("setValue", {
+              name: "pending",
+              value: nodes
+            });
+          }
+        });
     }
   },
   watch: {
     node: function(newVal) {
       if (newVal == null) return;
       var _this = this;
+      console.log("node:", newVal);
       axios
-        .post(
-          "/api/workflow/log",
-          qs.stringify({
-            workflow: JSON.stringify(newVal.workflow)
-          })
-        )
+        .get("/api/workflow/log?id=" + newVal.workflow.id)
         .then(function(response) {
           if (response.data.success) {
             var logs = [];
@@ -129,15 +164,32 @@ export default {
             }
             _this.logs = logs;
           }
-          console.log("response:", response);
         });
       this.layout = JSON.parse(newVal.workflow.workflowLayout);
       this.data = JSON.parse(newVal.workflow.property.property);
       let name = this.node.nodeName;
       for (let i of this.layout) {
-        if (i.nodes.indexOf(name) == -1) i.editable = false;
+        if (i.nodes.indexOf(name) == -1) {
+          i.editable = false;
+          if (i.type == "table") {
+            for (let j of i.fields) {
+              j.editable = false;
+            }
+          }
+        }
       }
-      if (this.data == null) this.data = {};
+
+      if (this.data == null || newVal.workflow.property.property.length == 2) {
+        console.log("data null");
+        this.data = {};
+        for (let i of this.layout) {
+          if (i.type == "table") this.data[i.key] = [];
+          else this.data[i.key] = null;
+        }
+      }
+      this.show = true;
+      console.log("layout:", this.layout);
+      console.log("data:", this.data);
     }
   },
   filters: {

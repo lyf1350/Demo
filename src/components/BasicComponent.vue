@@ -5,24 +5,24 @@
       <b-input
         v-if="config.type=='string'&&config.selectable==false"
         v-model="data"
-        @change="change"
         type="text"
+        @change="change"
       ></b-input>
       <v-select
         v-if="config.type=='string'&&config.selectable"
         v-model="data"
-        @change="change"
         :options="config.options"
         :multiple="config.multiple"
+        @change="change"
       />
       <b-input v-if="config.type=='number'" type="number" v-model="data" @change="change"></b-input>
       <datepicker
         v-if="config.type=='date'"
         v-model="data"
-        @input="change"
         :format="formatter"
         monday-first
         input-class="form-control"
+        @input="change"
       />
     </div>
     <div v-else>
@@ -46,13 +46,21 @@ export default {
       data: this.value
     };
   },
-
+  mounted() {
+    console.log("mounted");
+  },
   methods: {
     change() {
       this.$emit("update", this.data);
     },
     formatter(value) {
       return moment(value).format("YYYY-MM-DD");
+    }
+  },
+  updated() {},
+  watch: {
+    value: function(newVal, oldVal) {
+      this.data = newVal;
     }
   }
 };

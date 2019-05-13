@@ -7,7 +7,7 @@
       <!-- <button class="btn btn-primary" @click="type='modifyAction'">修改Action模版</button> -->
       <b-btn class="ml-auto" v-if="type.length>0" @click="initEditor">{{showInfo?'显示流程页面':'显示信息页面'}}</b-btn>
       <b-btn v-b-modal.info v-if="showInfo" @click="layout=editor.getValue()">流程页面预览</b-btn>
-      
+
       <button
         class="btn btn-success"
         @click="createWorkflowTemplate"
@@ -82,7 +82,7 @@
               </div>
             </div>
             <!-- Action：
-            <input type="text" v-model="data"> -->
+            <input type="text" v-model="data">-->
           </div>
         </div>
       </div>
@@ -168,7 +168,8 @@ export default {
       selectedNode: null,
       layout: [],
       editor: null,
-      layoutData: {}
+      layoutData: {},
+      members: []
     };
   },
   filters: {
@@ -218,6 +219,11 @@ export default {
         });
       }
     });
+    axios.get("/api/member/list").then(response => {
+      for (let i of response.data.data) {
+        _this.members.push(i);
+      }
+    });
   },
   methods: {
     deleteWorkflowTemplate() {
@@ -248,8 +254,9 @@ export default {
       var workflowTemplate = {
         id: this.workflowTemplate.value.id,
         templateModel: this.myDiagram.model.toJson(),
-        templateLayout: this.layout
+        templateLayout: JSON.stringify(this.editor.getValue())
       };
+      console.log("layout:", this.layout);
       var toMap = {};
       var fromMap = {};
       for (let i of nodeData) {
@@ -304,7 +311,7 @@ export default {
       }
       var workflowTemplate = {
         templateModel: this.myDiagram.model.toJson(),
-        templateLayout: JSON.stringify(this.layout)
+        templateLayout: JSON.stringify(this.editor.getValue())
       };
       var toMap = {};
       var fromMap = {};
@@ -355,12 +362,26 @@ export default {
           user: this.user.value
         });
       } else if (this.role != null && this.group != null) {
-        this.selectedNode.data.prop.reviewers.push({
-          type: "member",
-          label: "组:" + this.group.label + " 角色:" + this.role.label,
-          group: this.group.value,
-          role: this.role
-        });
+        console.log("member:", this.members);
+        console.log("role:", this.role.value);
+        console.log("group:", this.group.value);
+
+        if (
+          this.members.some(
+            e =>
+              e.group.id == this.group.value.id &&
+              e.role.id == this.role.value.id
+          )
+        ) {
+          this.selectedNode.data.prop.reviewers.push({
+            type: "member",
+            label: "组:" + this.group.label + " 角色:" + this.role.label,
+            group: this.group.value,
+            role: this.role.value
+          });
+        } else {
+          $.alert("没有该成员");
+        }
       } else if (this.role != null) {
         this.selectedNode.data.prop.reviewers.push({
           type: "role",
@@ -388,12 +409,15 @@ export default {
       this.myDiagram.commitTransaction("updated");
     },
     initModifyTemplate() {
-      if (this.workflowTemplate)
+      if (this.workflowTemplate) {
+        console.log(this.workflowTemplate);
         service.initTemplate(
           this,
           "myModifyDiv",
           this.workflowTemplate.value.templateModel
         );
+        this.layout = JSON.parse(this.workflowTemplate.value.templateLayout);
+      }
     },
     initCreateTemplate() {
       this.showInfo = false;

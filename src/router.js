@@ -1,13 +1,14 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Home from "./views/Home.vue";
-import store from "./store"
+import store from "./store";
 Vue.use(Router);
 
 export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
-  routes: [{
+  routes: [
+    {
       path: "/",
       component: Home
     },
@@ -16,13 +17,13 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () =>
-        import("./views/About.vue")
-    }, {
+      component: () => import("./views/About.vue")
+    },
+    {
       path: "/test",
-      component: () =>
-        import("./views/Test.vue")
-    }, {
+      component: () => import("./views/Test.vue")
+    },
+    {
       path: "/pic",
       beforeEnter: (to, from, next) => {
         // ...
@@ -33,66 +34,68 @@ export default new Router({
 
         next();
       },
-      component: () =>
-        import("./views/pic.vue")
-    }, {
+      component: () => import("./views/pic.vue")
+    },
+    {
       path: "/table",
-      component: () =>
-        import("./views/table.vue")
-    }, {
+      component: () => import("./views/table.vue")
+    },
+    {
       path: "/login",
       beforeEnter: (to, from, next) => {
-
-        if (sessionStorage.getItem('user') == null)
-          next();
+        if (sessionStorage.getItem("user") == null) next();
         else {
           console.log("???");
-          next('/');
+          next("/");
         }
       },
-      component: () =>
-        import("./views/login.vue")
-    }, {
+      component: () => import("./views/login.vue")
+    },
+    {
       path: "/register",
-      component: () =>
-        import("./views/register.vue")
-    }, {
+      component: () => import("./views/register.vue")
+    },
+    {
       path: "/user",
-      component: () =>
-        import("./views/user.vue")
-    }, {
+      component: () => import("./views/user.vue")
+    },
+    {
       path: "/message",
-      component: () =>
-        import("./views/message.vue")
-    }, {
+      component: () => import("./views/message.vue")
+    },
+    {
       path: "/admin",
       beforeEnter: (to, from, next) => {
-        if (store.state.user==null)
-          next('/login');
-        else if(store.state.user.members.some(e=>e.role.roleName="管理员")){
+        if (store.state.user == null) next("/login");
+        else if (
+          store.state.user.members.some(e => (e.role.roleName = "管理员"))
+        ) {
           next();
-        }else{ 
-          next('/auth');
+        } else {
+          next("/auth");
         }
       },
-      component: () =>
-        import("./views/admin.vue")
-    }, {
+      component: () => import("./views/admin.vue")
+    },
+    {
       path: "/auth",
-      component: () =>
-        import("./views/auth.vue")
-    }, {
+      component: () => import("./views/auth.vue")
+    },
+    {
       path: "/template",
-      component: () =>
-        import("./views/template.vue")
-    }, {
+      component: () => import("./views/template.vue")
+    },
+    {
       path: "/workflow",
-      component: () =>
-        import("./views/workflow.vue")
-    }, {
+      component: () => import("./views/workflow.vue")
+    },
+    {
       path: "/file",
-      component: () =>
-        import("./views/file.vue")
+      component: () => import("./views/file.vue")
+    },
+    {
+      path: "/config",
+      component: () => import("./views/config.vue")
     }
   ]
 });
