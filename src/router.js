@@ -96,6 +96,10 @@ export default new Router({
     {
       path: "/config",
       component: () => import("./views/config.vue")
+    },
+    {
+      path: "/calendar",
+      component: () => import("./views/calendar.vue")
     }
   ]
 });

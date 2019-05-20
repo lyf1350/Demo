@@ -60,6 +60,11 @@
               data-target="#personModal"
               @click="clear"
             >编辑审核人</button>
+            <b-btn v-b-modal.action @click="initAction(selectedNode.data.prop.actions)">编辑Action</b-btn>
+            <b-modal id="action" hide-footer hide-header size="xl">
+              <b-btn variant="success" @click="saveAction">保存</b-btn>
+              <div id="action_holder"></div>
+            </b-modal>
             <div class="modal" id="personModal">
               <div class="modal-dialog">
                 <div class="modal-content">
@@ -87,8 +92,6 @@
         </div>
       </div>
     </div>
-    <div v-if="type=='createAction'">create</div>
-    <div v-if="type=='modifyAction'">modify</div>
     <div v-show="showInfo">
       <div id="editor_holder"></div>
     </div>
@@ -169,7 +172,9 @@ export default {
       layout: [],
       editor: null,
       layoutData: {},
-      members: []
+      members: [],
+      actions: [],
+      actionEditor: null
     };
   },
   filters: {
@@ -184,7 +189,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    axios.get("/api/user/list").then(response => {
+    axios.get("/api/user/list/valid").then(response => {
       for (let i of response.data.data) {
         _this.userOptions.push({
           type: "user",
@@ -224,6 +229,11 @@ export default {
         _this.members.push(i);
       }
     });
+    axios.get("/api/action/methods").then(response => {
+      for (let i of response.data.data) {
+        _this.actions.push(i);
+      }
+    });
   },
   methods: {
     deleteWorkflowTemplate() {
@@ -254,7 +264,9 @@ export default {
       var workflowTemplate = {
         id: this.workflowTemplate.value.id,
         templateModel: this.myDiagram.model.toJson(),
-        templateLayout: JSON.stringify(this.editor.getValue())
+        templateLayout: this.editor
+          ? JSON.stringify(this.editor.getValue())
+          : this.workflowTemplate.value.templateLayout
       };
       console.log("layout:", this.layout);
       var toMap = {};
@@ -262,10 +274,19 @@ export default {
       for (let i of nodeData) {
         switch (i.category) {
           case "common":
+            let actions = [];
+            for (let j of i.prop.actions) {
+              actions.push({
+                action: j.action,
+                type: j.type,
+                actionArguments: JSON.stringify(j.actionArguments)
+              });
+            }
             nodeArray.push({
               nodeKey: i.key,
               templatename: i.text,
-              reviewers: i.prop.reviewers
+              reviewers: i.prop.reviewers,
+              actions: actions
             });
             break;
           case "Comment":
@@ -311,17 +332,28 @@ export default {
       }
       var workflowTemplate = {
         templateModel: this.myDiagram.model.toJson(),
-        templateLayout: JSON.stringify(this.editor.getValue())
+        templateLayout: this.editor
+          ? JSON.stringify(this.editor.getValue())
+          : []
       };
       var toMap = {};
       var fromMap = {};
       for (let i of nodeData) {
         switch (i.category) {
           case "common":
+            let actions = [];
+            for (let j of i.prop.actions) {
+              actions.push({
+                action: j.action,
+                type: j.type,
+                actionArguments: JSON.stringify(j.actionArguments)
+              });
+            }
             nodeArray.push({
               nodeKey: i.key,
               templatename: i.text,
-              reviewers: i.prop.reviewers
+              reviewers: i.prop.reviewers,
+              actions: actions
             });
             break;
           case "Comment":
@@ -329,6 +361,8 @@ export default {
             break;
         }
       }
+      console.log("nodeArray:", nodeArray);
+      return;
       console.log("111");
       for (let i of linkData) {
         if (i.from == -1 || i.to == -2) continue;
@@ -423,6 +457,57 @@ export default {
       this.showInfo = false;
       this.type = "createTemplate";
       service.initTemplate(this, "myCreateDiv", JSON.stringify(this.template));
+    },
+    initAction(data) {
+      let _this = this;
+      let element = document.getElementById("action_holder");
+      if (this.actionEditor) this.actionEditor.destroy();
+      this.actionEditor = new JSONEditor(element, {
+        theme: "bootstrap4",
+        iconlib: "fontawesome5",
+        schema: {
+          type: "array",
+          title: "Action配置",
+          items: {
+            type: "object",
+            title: "Action",
+            properties: {
+              action: {
+                type: "string",
+                title: "Action名称",
+                enum: _this.actions
+              },
+              type: {
+                type: "string",
+                title: "Action类型",
+                enum: ["pre", "post"]
+              },
+              actionArguments: {
+                type: "array",
+                title: "Action参数",
+                items: {
+                  type: "object",
+                  title: "参数",
+                  properties: {
+                    key: {
+                      type: "string",
+                      title: "key"
+                    },
+                    value: {
+                      type: "string",
+                      title: "value"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+      this.actionEditor.setValue(data);
+    },
+    saveAction() {
+      this.selectedNode.data.prop.actions = this.actionEditor.getValue();
     },
     initEditor() {
       this.showInfo = !this.showInfo;

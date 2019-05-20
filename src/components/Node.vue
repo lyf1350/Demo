@@ -100,7 +100,12 @@ export default {
             property: JSON.stringify(this.data)
           })
         )
-        .then(response => (_this.show = false));
+        .then(response => {
+          if (response.data.success) _this.show = false;
+          else {
+            $.alert(response.data.msg, "流程执行出错");
+          }
+        });
     },
     filterFunction(value) {
       console.log("value:" + JSON.stringify(value));

@@ -1,8 +1,13 @@
 <template>
   <div>
     <br>
-
-    <b-container>
+    <v-select v-model="type" :options="typeOptions"></v-select>
+    <div v-if="type=='holiday'">
+      <b-btn @click="saveHoliday" variant="success">保存配置</b-btn>
+      <b-input v-model="holidayYear" placeholder="年"></b-input>
+      <b-input v-model="holiday" placeholder="假日配置"></b-input>
+    </div>
+    <b-container v-if="type=='table'">
       <b-row>
         <b-input v-model="config.configName" placeholder="表名" @keyup.enter="load"/>
         <b-btn @click="load">加载</b-btn>
@@ -84,7 +89,11 @@ export default {
         { key: "formatter", label: "formatter" }
       ],
       formatters: ["dateFormatter"],
-      isBusy: false
+      isBusy: false,
+      type: null,
+      typeOptions: ["table", "holiday"],
+      holidayYear: null,
+      holiday: null
     };
   },
   methods: {
@@ -142,6 +151,19 @@ export default {
           "/api/config/createOrSave",
           qs.stringify({
             config: JSON.stringify(config)
+          })
+        )
+        .then(response => console.log(response.data));
+    },
+    saveHoliday() {
+      if (this.holidayYear == null || this.holiday == null) return;
+      axios
+        .post(
+          "/api/config/createOrSave",
+          qs.stringify({
+            type: "holiday",
+            configName: this.holidayYear,
+            val: this.holiday
           })
         )
         .then(response => console.log(response.data));

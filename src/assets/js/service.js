@@ -225,7 +225,7 @@ export default {
             _this.selectedNode = node;
             if (node.data.id != node.key) {
               node.data.id = node.key;
-              _this.$set(node.data, "prop", { reviewers: [] });
+              _this.$set(node.data, "prop", { reviewers: [], actions: [] });
             }
             $(propId).modal("show");
           }

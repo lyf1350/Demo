@@ -181,6 +181,7 @@ export default {
         if (i.category == "common") {
           i.prop.reviewers =
             i.prop.reviewers.length > 0 ? i.prop.reviewers : reviewer;
+          for (let j of i.prop.actions) j.id = null;
           nodeArray.push({
             nodeKey: i.key,
             reviewers: i.prop.reviewers
@@ -203,7 +204,10 @@ export default {
             nodeArray: JSON.stringify(nodeArray)
           })
         )
-        .then(response => console.log(response.data));
+        .then(response => {
+          if (!response.data.success)
+            $.alert(response.data.msg, "流程创建出错");
+        });
     },
     initTemplate() {
       console.log("value:" + JSON.stringify(this.workflowTemplate));
@@ -266,7 +270,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    axios.get("/api/user/list").then(response => {
+    axios.get("/api/user/list/valid").then(response => {
       for (let i of response.data.data) {
         _this.userOptions.push({
           type: "user",

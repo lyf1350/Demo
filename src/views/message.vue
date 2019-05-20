@@ -1,6 +1,11 @@
 <template>
   <div class="border border-1 my-box">
-    <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modal">发送消息</button>
+    <button
+      type="button"
+      class="btn btn-primary btn-block"
+      data-toggle="modal"
+      data-target="#modal"
+    >发送消息</button>
     <div class="modal" id="modal">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
@@ -103,13 +108,13 @@ export default {
     //                 }
     //             });
     //         };
-    console.log("maginificent:"+$.magnificPopup);
+    console.log("maginificent:" + $.magnificPopup);
     var $this = this;
     CKEditor.create(document.querySelector("#editor"), {
       language: "zh-cn"
     }).then(editor => ($this.editor = editor));
 
-    axios.get("/api/user/list").then(response => {
+    axios.get("/api/user/list/valid").then(response => {
       for (let i of response.data.data) {
         $this.options.push({
           type: "user",

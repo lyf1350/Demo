@@ -1,11 +1,17 @@
 <template>
   <div>
-    <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modal" @click="role=''">管理角色</button>
+    <button
+      type="button"
+      class="btn btn-primary btn-block"
+      data-toggle="modal"
+      data-target="#modal"
+      @click="role=''"
+    >管理角色</button>
     <div class="modal" id="modal">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
           角色：
-          <input type="text" v-model="role"/>
+          <input type="text" v-model="role">
           <button class="btn btn-primary" @click="createRole">创建</button>
           <div class="form-group" v-for="(role,index) in roles" :key="'role'+index">
             {{role.value.roleName}}
@@ -15,12 +21,18 @@
       </div>
     </div>
 
-    <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#modal2" @click="group=''">管理组</button>
+    <button
+      type="button"
+      class="btn btn-success btn-block"
+      data-toggle="modal"
+      data-target="#modal2"
+      @click="group=''"
+    >管理组</button>
     <div class="modal" id="modal2">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
           组：
-          <input type="text" v-model="group"/>
+          <input type="text" v-model="group">
           <button class="btn btn-primary" @click="createGroup">创建</button>
           <div class="form-group" v-for="(group,index) in groups" :key="'group'+index">
             {{group.value.groupName}}
@@ -29,32 +41,40 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-warning btn-block" data-toggle="modal" data-target="#modal1">用户管理</button>
+    <button
+      type="button"
+      class="btn btn-warning btn-block"
+      data-toggle="modal"
+      data-target="#modal1"
+    >用户管理</button>
     <div class="modal" id="modal1">
       <div class="modal-dialog" style="max-width:800px">
         <div class="modal-content">
-          <div class="form-group">人员:
+          <div class="form-group">
+            人员:
             <v-select v-model="person" :options="personOptions"></v-select>
           </div>
-          <div class="form-group">组：
+          <div class="form-group">
+            组：
             <v-select v-model="group" :options="groups"></v-select>
           </div>
-          <div class="form-group">角色：
+          <div class="form-group">
+            角色：
             <v-select :options="roles" v-model="role"></v-select>
           </div>
-            <!-- <button class="btn btn-danger btn-block" @click="deleteUser" v-if="person">删除用户</button> -->
 
-            <button class="btn btn-primary btn-block" @click="attachMember" v-if="person">添加角色</button>
+          <button class="btn btn-primary btn-block" @click="attachMember" v-if="person">添加角色</button>
 
           <div v-if="person.value!=null">
             <div class="form-group" v-for="member in person.value.members" :key="member.id">
               组:{{member.group.groupName}} 角色:{{member.role.roleName}}
-              
               <button
                 class="btn btn-danger"
                 @click="detachMember(member)"
               >移除</button>
             </div>
+            <b-btn block v-if="person.value.state==1" variant="danger" @click="setState(0)">失效</b-btn>
+            <b-btn block v-if="person.value.state==0" variant="success" @click="setState(1)">生效</b-btn>
           </div>
         </div>
       </div>
@@ -116,13 +136,13 @@ export default {
     });
   },
   watch: {
-    person: newVal=>{
+    person: newVal => {
       if (newVal == null) this.person = {};
     }
   },
   methods: {
     createRole() {
-      console.log("role:"+this.role);
+      console.log("role:" + this.role);
       axios
         .post(
           "/api/role/create",
@@ -175,6 +195,7 @@ export default {
         });
     },
     attachMember() {
+      var _this = this;
       axios
         .post(
           "/api/member/attach",
@@ -184,9 +205,15 @@ export default {
             username: this.person.value.username
           })
         )
-        .then(response => console.log(JSON.stringify(response.data)));
+        .then(response => {
+          if (response.data.success) {
+            _this.person.value.members.push(response.data.data);
+          }
+        });
     },
     detachMember(member) {
+      var _this = this;
+
       axios
         .post(
           "/api/member/detach",
@@ -195,7 +222,24 @@ export default {
             username: this.person.value.username
           })
         )
-        .then(response => console.log(JSON.stringify(response.data)));
+        .then(response => {
+          if (response.data.success) {
+            _this.person.value.members = _this.person.value.members.filter(
+              m => m.id != member.id
+            );
+          }
+        });
+    },
+    setState(state) {
+      this.person.value.state = state;
+      axios
+        .post(
+          "/api/user/save",
+          qs.stringify({
+            user: JSON.stringify(this.person.value)
+          })
+        )
+        .then(response => console.log(response.data));
     }
   }
 };
