@@ -34,7 +34,7 @@
     "jquery-ui": "^1.12.1",
     "jquery.nicescroll": "^3.7.6",
     "jsoneditor": "^5.32.4",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "malihu-custom-scrollbar-plugin": "^3.1.5",
     "moment": "^2.24.0",
     "pdfjs-dist": "^2.0.943",
