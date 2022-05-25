@@ -21,7 +21,7 @@
     "axios": "^0.21.1",
     "blueimp-md5": "^2.10.0",
     "bootstrap": "^4.3.1",
-    "bootstrap-table": "^1.14.1",
+    "bootstrap-table": "^1.20.2",
     "bootstrap-vue": "^2.0.0-rc.16",
     "circular-json": "^0.5.9",
     "d3": "^5.9.2",
